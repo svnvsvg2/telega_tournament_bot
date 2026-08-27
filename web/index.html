@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mortal Kombat 1 — Турнирная Сетка</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Хедер -->
+  <header class="header">
+    <div class="logo-container">
+      <div class="logo-emblem">⚡</div>
+      <div>
+        <h1 id="org-title">DARACYBER ESPORTS</h1>
+        <p class="subtitle">Официальная киберспортивная платформа турниров</p>
+      </div>
+    </div>
+    <div class="header-status">
+      <button id="tv-mode-btn" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">📺 Режим Сцены</button>
+      <span class="live-indicator"><span class="dot"></span> LIVE UPDATES</span>
+      <span id="admin-badge" class="admin-badge hidden">⚙️ Админ активирован</span>
+    </div>
+  </header>
+
+  <!-- Навигация (Админка убрана с главной страницы) -->
+  <nav class="nav">
+    <button class="nav-btn active" data-tab="home">🏠 Главная</button>
+    <button class="nav-btn" data-tab="tournaments">🎮 Турниры</button>
+    <button class="nav-btn" data-tab="bracket">🏆 Турнирная Сетка</button>
+    <button class="nav-btn" data-tab="participants">👥 Участники</button>
+  </nav>
+
+  <!-- Контент -->
+  <main class="container">
+
+    <!-- Вкладка 1: Главная (DARACYBER Overview) -->
+    <section id="home-tab" class="tab-content active">
+      <div class="hero-banner">
+        <div class="hero-content">
+          <div class="hero-badge">⚡ DARACYBER ESPORTS ORGANISATION</div>
+          <h1>ДОБРО ПОЖАЛОВАТЬ В DARACYBER</h1>
+          <p>Мы — киберспортивная организация DARACYBER, объединяющая сильнейших игроков файтингов и дисциплин. Проводим профессиональные турниры с интерактивной live-сеткой, прозрачной системой Double Elimination и автоматизацией в Telegram.</p>
+          <div class="hero-buttons">
+            <button class="btn btn-gold nav-trigger" data-tab="tournaments">🎮 Предстоящий Турнир</button>
+            <button class="btn btn-primary nav-trigger" data-tab="bracket">🏆 Сетка Матчей</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Карточки о нас -->
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Мгновенный Live-Счёт</h3>
+          <p>Результаты матчей обновляются в режиме реального времени. Зрители и игроки сразу видят продвижение по сетке.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚔️</div>
+          <h3>Double Elimination</h3>
+          <p>Каждый участник получает шанс на реванш в Сетке Лузеров. Никаких случайных вылетов после 1 поражения.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🤖</div>
+          <h3>Telegram Интеграция</h3>
+          <p>Регистрация, подтверждение участия за 24 часа и рассылка результатов осуществляются через Telegram-бота.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Вкладка 2: Турниры (Глава: Турниры) -->
+    <section id="tournaments-tab" class="tab-content">
+      <div class="section-title">
+        <h2>🎮 Глава: Турниры DARACYBER</h2>
+        <span class="count-badge">Актуальный сезон</span>
+      </div>
+
+      <!-- Карточка Предстоящего Турнира -->
+      <div class="tournament-card-main">
+        <div class="tournament-card-header">
+          <div class="tournament-status-tag">🟢 РЕГИСТРАЦИЯ ОТКРЫТА</div>
+          <div class="tournament-org-tag">DARACYBER OFFICIAL</div>
+        </div>
+
+        <div class="tournament-card-body">
+          <div class="tournament-icon">🐉</div>
+          <div class="tournament-info">
+            <h2 id="tourney-title-display">DARACYBER Mortal Kombat 1 Championship</h2>
+            <p class="tournament-desc">Официальный киберспортивный турнир организации DARACYBER по Mortal Kombat 1. Борьба 16 игроков в формате Double Elimination: все матчи Bo1, Гранд-Финал — Bo5 с переигровкой при победе из сетки лузеров!</p>
+            
+            <div class="tournament-meta-grid">
+              <div class="meta-item">
+                <span class="meta-label">📅 Дата и Время:</span>
+                <span class="meta-value" id="tourney-datetime">8 сентября 2026 в 20:00</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">🎮 Дисциплина:</span>
+                <span class="meta-value">Mortal Kombat 1 (Актуальный патч)</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">⚔️ Система Сетки:</span>
+                <span class="meta-value">Double Elimination (Верхняя + Нижняя)</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">⏱ Формат Матчей:</span>
+                <span class="meta-value">Bo1 (Сетки) | Bo5 (Гранд-Финал)</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">👥 Зарегистрировано:</span>
+                <span class="meta-value" id="tourney-players-count">0 / 16 игроков</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tournament-card-actions">
+          <button class="btn btn-gold nav-trigger" data-tab="bracket">🏆 Смотреть Турнирную Сетку</button>
+          <a id="tg-bot-link" href="https://t.me/" target="_blank" class="btn btn-primary">🤖 Зарегистрироваться в Telegram</a>
+          <button id="show-rules-btn" class="btn btn-secondary">📜 Читать Регламент</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Вкладка 3: Турнирная Сетка -->
+    <section id="bracket-tab" class="tab-content">
+      <div class="bracket-controls">
+        <span class="info-text">💡 Нажмите на матч (для админов), чтобы обновить результат в реальном времени. Все матчи Bo1, Гранд-Финал — Bo5.</span>
+        <button id="refresh-btn" class="btn btn-secondary">🔄 Обновить</button>
+      </div>
+
+      <!-- Верхняя Сетка (Winners Bracket) -->
+      <div class="bracket-section-title">
+        <h2>👑 ВЕРХНЯЯ СЕТКА (WINNERS BRACKET)</h2>
+      </div>
+      <div class="bracket-container" id="bracket-tree-winners">
+        <div class="round-column">
+          <div class="round-header">1/8 ФИНАЛА WB <span class="bo-tag">Bo1</span></div>
+          <div class="matches-list" id="winners-round-1"></div>
+        </div>
+        <div class="round-column">
+          <div class="round-header">ЧЕТВЕРТЬФИНАЛ WB <span class="bo-tag">Bo1</span></div>
+          <div class="matches-list" id="winners-round-2"></div>
+        </div>
+        <div class="round-column">
+          <div class="round-header">ПОЛУФИНАЛ WB <span class="bo-tag">Bo1</span></div>
+          <div class="matches-list" id="winners-round-3"></div>
+        </div>
+        <div class="round-column final-column">
+          <div class="round-header">ФИНАЛ WB <span class="bo-tag">Bo1</span></div>
+          <div class="matches-list" id="winners-round-4"></div>
+        </div>
+      </div>
+
+      <!-- Сетка Лузеров (Losers Bracket) -->
+      <div class="bracket-section-title section-margin-top">
+        <h2>💀 СЕТКА ЛУЗЕРОВ (LOSERS BRACKET)</h2>
+      </div>
+      <div class="bracket-container bracket-container-losers" id="bracket-tree-losers">
+        <div class="round-column">
+          <div class="round-header">РАУНД 1 LB <span class="bo-tag">Bo1</span></div>
+          <div class="matches-list" id="losers-round-1"></div>
+        </div>
+        <div class="round-column">
+          <div class="round-header">РАУНД 2 LB <span class="bo-tag">Bo1</span></div>
+          <div class="matches-list" id="losers-round-2"></div>
+        </div>
+        <div class="round-column">
+          <div class="round-header">РАУНД 3 LB <span class="bo-tag">Bo1</span></div>
+          <div class="matches-list" id="losers-round-3"></div>
+        </div>
+        <div class="round-column">
+          <div class="round-header">РАУНД 4 LB <span class="bo-tag">Bo1</span></div>
+          <div class="matches-list" id="losers-round-4"></div>
+        </div>
+        <div class="round-column">
+          <div class="round-header">ПОЛУФИНАЛ LB <span class="bo-tag">Bo1</span></div>
+          <div class="matches-list" id="losers-round-5"></div>
+        </div>
+        <div class="round-column final-column">
+          <div class="round-header">ФИНАЛ LB <span class="bo-tag">Bo1</span></div>
+          <div class="matches-list" id="losers-round-6"></div>
+        </div>
+      </div>
+
+      <!-- Гранд-Финал и Сброс Сетки -->
+      <div class="bracket-section-title section-margin-top">
+        <h2>🏆 ГРАНД-ФИНАЛ (GRAND FINAL)</h2>
+      </div>
+      <div class="bracket-container bracket-container-grand" id="bracket-tree-grand">
+        <div class="round-column grand-column">
+          <div class="round-header grand-header">👑 ГРАНД-ФИНАЛ <span class="bo-tag gold">Bo5</span></div>
+          <div class="matches-list" id="grand-final-matches"></div>
+        </div>
+        <div class="round-column reset-column">
+          <div class="round-header reset-header">🔥 СБРОС СЕТКИ (BRACKET RESET) <span class="bo-tag gold">Bo5</span></div>
+          <div class="matches-list" id="reset-final-matches"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Вкладка 2: Участники -->
+    <section id="participants-tab" class="tab-content">
+      <div class="section-title">
+        <h2>Зарегистрированные Участники</h2>
+        <span id="participants-count" class="count-badge">0 игроков</span>
+      </div>
+      <div class="participants-grid" id="participants-list"></div>
+    </section>
+
+    <!-- Вкладка 3: Админка (Доступ только по прямой ссылке /admin) -->
+    <section id="admin-tab" class="tab-content">
+      <div id="admin-login-card" class="card admin-login">
+        <h2>🔐 Вход в Админ-Панель DARACYBER</h2>
+        <p>Для входа введите логин и пароль администратора турнира:</p>
+        <div class="login-form-group">
+          <input type="text" id="admin-login-input" placeholder="Логин" value="admin">
+          <input type="password" id="admin-password-input" placeholder="Пароль">
+          <button id="admin-login-btn" class="btn btn-primary">Войти в Панель Управления</button>
+        </div>
+        <p id="login-error" class="error-text hidden"></p>
+      </div>
+
+      <div id="admin-panel-content" class="admin-panel hidden">
+        <div class="admin-actions">
+          <h2>⚙️ Управление Турнирной Сеткой DARACYBER</h2>
+          <div class="action-buttons">
+            <button id="seed-test-btn" class="btn btn-gold">🧪 Тестовый режим: 16 Игроков + Сетка</button>
+            <button id="generate-bracket-btn" class="btn btn-secondary">🎲 Сформировать из Бота</button>
+            <button id="reset-bracket-btn" class="btn btn-danger">🗑 Сбросить Сетку</button>
+          </div>
+        </div>
+
+        <div class="matches-admin-list" id="admin-matches-list">
+          <!-- Сюда динамически подгружаются матчи для редактирования -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Модальное окно редактирования матча -->
+  <div id="match-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Управление Матчем <span id="modal-match-id">#1</span></h3>
+        <button id="close-modal-btn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="player-editor">
+          <div class="player-box">
+            <label class="input-label">Участник 1:</label>
+            <select id="modal-p1-select" class="modal-select-player" onchange="onSelectPlayer(1)">
+              <option value="">-- Выбрать из списка --</option>
+            </select>
+            <input type="text" id="modal-p1-name-input" class="modal-player-input" placeholder="Имя Участника 1">
+            <input type="text" id="modal-p1-nick-input" class="modal-player-input sub-input" placeholder="Никнейм MK1">
+            <div class="score-controls">
+              <button class="score-btn" onclick="adjustScore(1, -1)">-</button>
+              <span class="score-val" id="modal-score1">0</span>
+              <button class="score-btn" onclick="adjustScore(1, 1)">+</button>
+            </div>
+            <button class="btn btn-winner" onclick="selectWinner(1)">Победитель 🥇</button>
+          </div>
+
+          <div class="vs-divider">VS</div>
+
+          <div class="player-box">
+            <label class="input-label">Участник 2:</label>
+            <select id="modal-p2-select" class="modal-select-player" onchange="onSelectPlayer(2)">
+              <option value="">-- Выбрать из списка --</option>
+            </select>
+            <input type="text" id="modal-p2-name-input" class="modal-player-input" placeholder="Имя Участника 2">
+            <input type="text" id="modal-p2-nick-input" class="modal-player-input sub-input" placeholder="Никнейм MK1">
+            <div class="score-controls">
+              <button class="score-btn" onclick="adjustScore(2, -1)">-</button>
+              <span class="score-val" id="modal-score2">0</span>
+              <button class="score-btn" onclick="adjustScore(2, 1)">+</button>
+            </div>
+            <button class="btn btn-winner" onclick="selectWinner(2)">Победитель 🥇</button>
+          </div>
+        </div>
+
+        <div class="status-selector">
+          <label>Статус матча:</label>
+          <select id="modal-status-select">
+            <option value="pending">⏳ Ожидает</option>
+            <option value="live">🔴 ИДЁТ БОЙ (LIVE)</option>
+            <option value="completed">✅ Завершён</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="save-match-btn" class="btn btn-primary">Сохранить и продвинуть победителя</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно регламента -->
+  <div id="rules-modal" class="modal hidden">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h3>📜 Официальный Регламент DARACYBER</h3>
+        <button id="close-rules-btn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body rules-modal-body" id="modal-rules-text">
+        Загрузка регламента...
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
