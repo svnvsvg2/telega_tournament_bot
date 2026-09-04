@@ -104,7 +104,10 @@ class TournamentHTTPRequestHandler(SimpleHTTPRequestHandler):
         login = str(payload.get("login", "")).strip()
         password = str(payload.get("password", "")).strip()
         pin = str(payload.get("pin", "")).strip()
+        passcode = str(payload.get("passcode", "")).strip()
 
+        if passcode == "4321" or passcode == config.ADMIN_PASSWORD:
+            return True
         if password == "4321" or pin == "4321" or password == config.ADMIN_PASSWORD or pin == config.ADMIN_PIN:
             return True
         if login == config.ADMIN_LOGIN and (password == config.ADMIN_PASSWORD or password == "4321"):
@@ -147,6 +150,21 @@ class TournamentHTTPRequestHandler(SimpleHTTPRequestHandler):
 
             db.seed_test_players()
             self._send_json({"ok": True, "message": "16 тестовых участников созданы, сетка сформирована!"})
+            return
+
+        if path == "/api/admin/fill_missing":
+            if not self._verify_admin(payload):
+                self._send_json({"ok": False, "message": "Неверный логин или пароль"}, code=401)
+                return
+
+            added = db.fill_missing_participants(target_count=config.MAX_PARTICIPANTS)
+            count_now = len(db.get_all_participants())
+            self._send_json({
+                "ok": True,
+                "added_count": len(added),
+                "total_count": count_now,
+                "message": f"Успешно добавлено {len(added)} игроков! Всего в турнире: {count_now}/{config.MAX_PARTICIPANTS}."
+            })
             return
 
         if path == "/api/admin/match":

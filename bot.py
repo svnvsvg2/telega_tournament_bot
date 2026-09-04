@@ -79,8 +79,8 @@ def get_main_keyboard(user_id: int = None):
 def get_admin_keyboard():
     keyboard = [
         ["📊 Список участников", "⏳ Неподтверждённые"],
-        ["📁 Выгрузить CSV"],
-        ["⬅️ Главное меню"],
+        ["🎲 Заполнить недостающих игроков"],
+        ["📁 Выгрузить CSV", "⬅️ Главное меню"],
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
@@ -376,6 +376,57 @@ async def unconfirmed_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+async def fill_random_players_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    if not is_admin(user_id):
+        await update.message.reply_text("У вас нет прав администратора.")
+        return
+
+    current_count = db.count_participants()
+    max_p = config.MAX_PARTICIPANTS or 16
+    needed = max_p - current_count
+
+    if needed <= 0:
+        await update.message.reply_text(
+            f"ℹ️ <b>Турнирная сетка уже полностью укомплектована!</b>\n\n"
+            f"Зарегистрировано участников: <b>{current_count} / {max_p}</b> ✅\n"
+            f"Все слоты заняты. Добавление случайных игроков не требуется.",
+            parse_mode=ParseMode.HTML,
+            reply_markup=get_admin_keyboard(),
+        )
+        return
+
+    added = db.fill_missing_participants(target_count=max_p)
+    if not added:
+        await update.message.reply_text(
+            "Не удалось добавить участников или турнир уже заполнен.",
+            reply_markup=get_admin_keyboard(),
+        )
+        return
+
+    lines = []
+    for i, p in enumerate(added, 1):
+        username_part = f" (@{p['username']})" if p.get("username") else ""
+        lines.append(f"{i}. {p['name']} | Ник: <b>{p['nickname']}</b>{username_part}")
+
+    total_now = current_count + len(added)
+    report_text = (
+        f"🎲 <b>Успешно добавлено {len(added)} недостающих игроков!</b>\n"
+        f"📊 Итого в турнире: <b>{total_now} / {max_p}</b> бойцов ✅\n\n"
+        f"<b>Добавленные участники:</b>\n"
+        + "\n".join(lines) + "\n\n"
+        f"🏆 <b>Турнирная сетка сформирована!</b>\n"
+        f"Все {max_p} участников распределены по парам Double Elimination.\n"
+        f"🌐 Сетка доступна на сайте: {config.WEB_URL}"
+    )
+
+    await update.message.reply_text(
+        report_text,
+        parse_mode=ParseMode.HTML,
+        reply_markup=get_admin_keyboard(),
+    )
+
+
 async def export_csv_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_admin(update.effective_user.id):
         await update.message.reply_text("У вас нет прав администратора.")
@@ -447,6 +498,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text += (
             "\n<b>Команды организатора:</b>\n"
             "⚙️ /admin — Открыть админ-панель\n"
+            "🎲 /fill_random — Заполнить недостающих игроков случайными именами\n"
             "📊 /participants — Список участников\n"
             "⏳ /unconfirmed — Список неподтверждённых\n"
             "📁 /export — Скачать список в CSV\n"
@@ -507,6 +559,7 @@ async def post_init(application: Application):
 
     admin_commands = user_commands + [
         BotCommand("admin", "⚙️ Панель администратора"),
+        BotCommand("fill_random", "🎲 Заполнить недостающих игроков"),
         BotCommand("participants", "📊 Список участников"),
         BotCommand("unconfirmed", "⏳ Неподтверждённые"),
         BotCommand("export", "📁 Скачать CSV для Excel"),
@@ -584,6 +637,12 @@ def main():
     application.add_handler(CommandHandler("admin", admin_panel))
     application.add_handler(MessageHandler(filters.Regex("^⚙️ Админ-панель$"), admin_panel))
     application.add_handler(MessageHandler(filters.Regex("^⬅️ Главное меню$"), main_menu_return))
+
+    application.add_handler(CommandHandler("fill_random", fill_random_players_cmd))
+    application.add_handler(CommandHandler("seed_random", fill_random_players_cmd))
+    application.add_handler(MessageHandler(filters.Regex("^🎲 Заполнить недостающих игроков$"), fill_random_players_cmd))
+    application.add_handler(MessageHandler(filters.Regex("^🎲 Заполнить недостающих$"), fill_random_players_cmd))
+    application.add_handler(MessageHandler(filters.Regex("^🎲 Залить рандомов$"), fill_random_players_cmd))
 
     application.add_handler(CommandHandler("participants", participants_list))
     application.add_handler(MessageHandler(filters.Regex("^📊 Список участников$"), participants_list))

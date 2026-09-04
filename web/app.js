@@ -708,6 +708,26 @@ async function seedTestPlayers() {
   }
 }
 
+async function fillMissingPlayers() {
+  if (!confirm("Дозаполнить недостающие слоты турнира случайными участниками до максимума (16)?\nВсе текущие игроки сохранятся.")) return;
+
+  try {
+    const res = await fetch("/api/admin/fill_missing", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(adminAuth)
+    });
+    const data = await res.json();
+    alert(data.message || "Участники успешно добавлены!");
+    previousBracketHash = "";
+    previousParticipantsHash = "";
+    fetchInfo();
+    loadData();
+  } catch (err) {
+    alert("Ошибка запроса к серверу");
+  }
+}
+
 async function generateBracket() {
   if (!confirm("Сформировать турнирную сетку на основе участников из Telegram бота?")) return;
 

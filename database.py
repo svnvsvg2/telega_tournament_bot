@@ -284,6 +284,114 @@ def import_players(players_list: list):
     return len(players_list)
 
 
+def fill_missing_participants(target_count: int = 16) -> list:
+    """
+    Дозаполняет турнир недостающим количеством уникальных случайных игроков до target_count.
+    Существующие зарегистрированные участники полностью сохраняются!
+    Автоматически обновляет турнирную сетку Double Elimination.
+    Возвращает список добавленных участников [{"telegram_id", "name", "nickname", "username"}, ...].
+    """
+    FIRST_NAMES = [
+        "Александр", "Дмитрий", "Максим", "Сергей", "Андрей", "Алексей", "Артем",
+        "Илья", "Кирилл", "Михаил", "Никита", "Матвей", "Роман", "Егор", "Арсений",
+        "Иван", "Денис", "Евгений", "Даниил", "Тимофей", "Владислав", "Игорь",
+        "Владимир", "Павел", "Руслан", "Антон", "Ярослав", "Глеб", "Виктор", "Марк",
+        "Олег", "Станислав", "Константин", "Богдан", "Тимур", "Вадим", "Юрий"
+    ]
+
+    BASE_NICKS = [
+        "Scorpion", "SubZero", "Raiden", "LiuKang", "JohnnyCage", "Smoke", "Reptile",
+        "KungLao", "Kenshi", "Baraka", "Rain", "Geras", "ShangTsung", "Mileena",
+        "Kitana", "LiMei", "Ashrah", "Havik", "GeneralShao", "Sindel", "Nitara",
+        "OmniMan", "Peacemaker", "Homelander", "NoobSaibot", "Cyrax", "Sektor",
+        "Shadow", "Viper", "Frost", "Blaze", "Striker", "Cyber", "Titan", "Apex",
+        "Nexus", "Vortex", "Storm", "Zenith", "Pulse", "Blade", "Ninja", "Dragon",
+        "Phoenix", "Chaos", "Hunter", "Ghost", "Phantom", "Spectre", "Frenzy"
+    ]
+
+    SUFFIXES = [
+        "_PRO", "_MK", "_GG", "_Master", "_King", "_God", "_Top", "_KZ",
+        "_EU", "_99", "_77", "X", "_Sensei", "_Prime", "_Dark", "_Legend",
+        "_Flash", "_Fury", "_Strike", "_Beast", "_Boss", ""
+    ]
+
+    with closing(get_connection()) as conn:
+        existing_rows = _fetchall(conn, "SELECT telegram_id, name, nickname, username FROM participants")
+        existing_count = len(existing_rows)
+        needed = target_count - existing_count
+        if needed <= 0:
+            return []
+
+        existing_ids = {int(r["telegram_id"]) for r in existing_rows}
+        existing_nicks = {str(r["nickname"]).lower() for r in existing_rows}
+        existing_names = {str(r["name"]).lower() for r in existing_rows}
+
+        shuffled_names = list(FIRST_NAMES)
+        random.shuffle(shuffled_names)
+
+        added_players = []
+        now = datetime.now().isoformat()
+
+        # Базовый Telegram ID для виртуальных участников
+        base_tg_id = 770000000
+
+        for i in range(needed):
+            # Подбираем имя
+            name = None
+            for fn in shuffled_names:
+                if fn.lower() not in existing_names:
+                    name = fn
+                    break
+            if not name:
+                fn = random.choice(FIRST_NAMES)
+                name = f"{fn} #{i+1}"
+            existing_names.add(name.lower())
+
+            # Подбираем никнейм
+            nick = None
+            for _ in range(100):
+                bn = random.choice(BASE_NICKS)
+                suf = random.choice(SUFFIXES)
+                candidate = f"{bn}{suf}"
+                if candidate.lower() not in existing_nicks:
+                    nick = candidate
+                    break
+            if not nick:
+                nick = f"Fighter_{random.randint(100, 999)}"
+            existing_nicks.add(nick.lower())
+
+            # Уникальный Telegram ID
+            tg_id = base_tg_id + random.randint(10000, 999999)
+            while tg_id in existing_ids:
+                tg_id += 1
+            existing_ids.add(tg_id)
+
+            # Юзернейм
+            clean_nick = "".join(c for c in nick if c.isalnum() or c == "_").lower()
+            tg_username = f"{clean_nick[:12]}_{random.randint(10, 99)}"
+
+            _execute(
+                conn,
+                """
+                INSERT INTO participants (telegram_id, username, name, nickname, registered_at, confirmed, confirmed_at)
+                VALUES (?, ?, ?, ?, ?, 1, ?)
+                """,
+                (tg_id, tg_username, name, nick, now, now),
+            )
+            added_players.append({
+                "telegram_id": tg_id,
+                "username": tg_username,
+                "name": name,
+                "nickname": nick,
+            })
+
+        conn.commit()
+
+    # Формируем турнирную сетку с учетом добавленных участников
+    generate_bracket(shuffle=True)
+    return added_players
+
+
 def export_to_csv(filepath: str = "participants_export.csv") -> str:
     """Экспортирует всех участников в CSV-файл."""
     import csv
