@@ -49,8 +49,16 @@ MAX_PARTICIPANTS = int(os.getenv("MAX_PARTICIPANTS", "16"))
 ADMIN_LOGIN = os.getenv("ADMIN_LOGIN", "admin")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "4321")
 ADMIN_PIN = os.getenv("ADMIN_PIN", "4321")
+def _normalize_url(url: str) -> str:
+    url = (url or "").strip()
+    if not url:
+        return "https://www.dara-cyber.kz"
+    if not (url.startswith("http://") or url.startswith("https://")):
+        return f"https://{url}"
+    return url
+
 WEB_PORT = int(os.getenv("PORT", os.getenv("WEB_PORT", "8088")))
-WEB_URL = os.getenv("WEB_URL", f"http://localhost:{WEB_PORT}")
+WEB_URL = _normalize_url(os.getenv("WEB_URL", "https://www.dara-cyber.kz"))
 
 
 
