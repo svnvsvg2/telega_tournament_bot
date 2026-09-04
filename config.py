@@ -11,7 +11,16 @@ load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 
 # ID администраторов бота через запятую, напр. "111111111,222222222"
-ADMIN_IDS = [int(x) for x in os.getenv("ADMIN_IDS", "").split(",") if x.strip()]
+def _parse_admin_ids(raw_val: str):
+    ids = []
+    for x in raw_val.split(","):
+        x = x.strip()
+        if x.isdigit() or (x.startswith("-") and x[1:].isdigit()):
+            ids.append(int(x))
+    return ids
+
+ADMIN_IDS = _parse_admin_ids(os.getenv("ADMIN_IDS", ""))
+
 
 ORGANIZER_USERNAME = os.getenv("ORGANIZER_USERNAME", "").replace("@", "").strip()
 BOT_USERNAME = os.getenv("BOT_USERNAME", "comp_games_lovers_bot").replace("@", "").strip()
