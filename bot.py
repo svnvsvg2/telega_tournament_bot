@@ -98,7 +98,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"Вы уже зарегистрированы на {config.TOURNAMENT_NAME}!\n\n"
             f"👤 Имя: {existing['name']}\n"
             f"🎮 Никнейм: {existing['nickname']}\n"
-            f"📌 Статус участия: {status_str}\n\n"
+            f"📌 Статус участия: {status_str}\n"
+            f"🌐 Сайт турнира: www.dara-cyber.kz\n\n"
             f"Используйте меню ниже для просмотра информации.",
             reply_markup=keyboard,
         )
@@ -147,6 +148,7 @@ async def receive_nickname(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"🎉 <b>Регистрация успешно завершена!</b>\n\n"
         f"👤 <b>Имя:</b> {name}\n"
         f"🎮 <b>Никнейм:</b> {nickname}\n\n"
+        f"🌐 <b>Сайт и сетка турнира:</b> www.dara-cyber.kz\n"
         f"📜 Правила и время — кнопка «📜 Правила и время» или /rules.\n"
         f"⏰ За 24 часа до турнира я пришлю вам напоминание с кнопкой подтверждения участия!",
         parse_mode=ParseMode.HTML,
@@ -486,13 +488,14 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     text = (
         "<b>Команды участника:</b>\n"
-        "🌐 /bracket — Турнирная сетка (Сайт)\n"
+        "🌐 /bracket — Турнирная сетка (www.dara-cyber.kz)\n"
         "📝 /start — Регистрация на турнир\n"
         "📜 /rules — Правила, регламент и время\n"
         "👤 /mystatus — Ваш статус и профиль\n"
         "❌ /unregister — Отменить регистрацию\n"
         "💬 /support — Написать в техподдержку\n"
-        "❓ /help — Справка\n"
+        "❓ /help — Справка\n\n"
+        "🌐 Официальный сайт: www.dara-cyber.kz\n"
     )
     if is_admin(user_id):
         text += (
@@ -512,12 +515,13 @@ async def bracket_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     url = config.WEB_URL
     reply_markup = None
     if url and not ("localhost" in url or "127.0.0.1" in url):
-        buttons = [[InlineKeyboardButton("🌐 Открыть сетку на сайте", url=url)]]
+        buttons = [[InlineKeyboardButton("🌐 Открыть сетку на www.dara-cyber.kz", url=url)]]
         reply_markup = InlineKeyboardMarkup(buttons)
     await update.message.reply_text(
         f"🏆 <b>Интерактивная сетка турнира {config.TOURNAMENT_NAME}:</b>\n\n"
-        f"Смотрите результаты матчей, расписание и прогресс турнира в реальном времени на нашем сайте:\n"
-        f"👉 <b>{url}</b>",
+        f"Смотрите результаты матчей, расписание и прогресс турнира в реальном времени на нашем официальном сайте:\n"
+        f"👉 <b>www.dara-cyber.kz</b>\n"
+        f"🔗 <a href=\"{url}\">{url}</a>",
         parse_mode=ParseMode.HTML,
         reply_markup=reply_markup,
     )
