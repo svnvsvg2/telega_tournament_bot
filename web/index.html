@@ -139,7 +139,7 @@
         <main class="home-full-poster-card">
           <div class="poster-fullscreen-wrapper">
             <div class="poster-glow-backdrop"></div>
-            <div class="poster-card-frame" onclick="openPosterModal()" title="Нажмите для открытия в полном окне">
+            <div class="poster-card-frame" onclick="showTournament('bracket')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); showTournament('bracket'); }" tabindex="0" role="button" title="Перейти к турниру (Сетка, Участники, Регламент)">
               <img 
                 id="home-main-image" 
                 class="poster-fullscreen-img" 
@@ -148,7 +148,7 @@
                 onerror="if (!this.src.endsWith('Artboard_4.jpg')) { this.src = '/img/Artboard_4.jpg'; }"
               >
               <div class="poster-overlay-hint">
-                <i class="fas fa-search-plus"></i> Просмотреть постер
+                <i class="fas fa-sitemap"></i> Перейти к турниру
               </div>
             </div>
           </div>

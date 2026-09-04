@@ -1416,19 +1416,27 @@ body.view-admin .header-inner {
 .poster-overlay-hint {
   position: absolute;
   inset: 0;
-  background: rgba(12, 13, 14, 0.6);
+  background: rgba(10, 11, 14, 0.45);
+  backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   color: #ffffff;
   font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
   opacity: 0;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 3;
+}
+
+.poster-overlay-hint i {
+  color: #f59e0b;
+  font-size: 18px;
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6));
 }
 
 /* Отключение анимаций после вступительного показа */
