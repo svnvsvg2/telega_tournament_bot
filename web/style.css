@@ -80,16 +80,16 @@ body {
 
 .header-inner {
   width: 100%;
-  max-width: var(--poster-width, min(calc((100vh - 95px) * 9 / 16), 92vw));
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 0;
+  padding: 0 24px;
   height: 68px;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
+  gap: 16px;
   position: relative;
   box-sizing: border-box;
-  transition: max-width 0.2s cubic-bezier(0.16, 1, 0.3, 1), padding 0.2s ease;
 }
 
 body.view-tournament .header-inner,
@@ -98,11 +98,11 @@ body.view-admin .header-inner {
   padding: 0 32px;
 }
 
-/* Левая часть: Выплывающее меню турнира (выровнено по левому краю постера) */
+/* Левая часть: Выплывающее меню турнира */
 .header-left-menu {
   display: flex;
   align-items: center;
-  position: relative;
+  justify-self: start;
   margin: 0;
   z-index: 10;
 }
@@ -433,15 +433,12 @@ body.view-admin .header-inner {
   gap: 6px;
 }
 
-/* Центр: Логотип DARACYBER строго по центру постера */
+/* Центр: Логотип DARACYBER строго по центру */
 .header-center-logo {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
   justify-content: center;
+  justify-self: center;
   z-index: 5;
   pointer-events: auto;
 }
@@ -495,12 +492,13 @@ body.view-admin .header-inner {
   text-transform: uppercase;
 }
 
-/* Правая часть: Соцсети (выровнены по правому краю постера) */
+/* Правая часть: Кнопка REGISTRATION и соцсети */
 .header-right-socials {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  justify-self: end;
   margin: 0;
-  margin-left: auto;
   z-index: 10;
 }
 
@@ -511,6 +509,7 @@ body.view-admin .header-inner {
 .header-socials {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
 }
 
@@ -585,6 +584,56 @@ body.view-admin .header-inner {
   border-color: rgba(245, 158, 11, 0.5);
   background: rgba(245, 158, 11, 0.1);
   transform: translateY(-1px);
+}
+
+/* Адаптивность шапки для средних и узких экранов десктопа (769px - 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .header-inner {
+    padding: 0 16px;
+    gap: 12px;
+  }
+  .tourney-dropdown-btn {
+    padding: 7px 12px;
+    font-size: 11.5px;
+    gap: 6px;
+  }
+  .header-reg-btn {
+    padding: 7px 12px;
+    font-size: 11px;
+    gap: 6px;
+  }
+  .brand-logo {
+    gap: 9px;
+  }
+  .brand-emblem {
+    width: 28px;
+    height: 28px;
+  }
+  .brand-name {
+    font-size: 15px;
+    letter-spacing: 0.9px;
+  }
+  .brand-tag {
+    font-size: 7.5px;
+    letter-spacing: 1.5px;
+  }
+}
+
+@media (max-width: 860px) and (min-width: 769px) {
+  .brand-tag {
+    display: none;
+  }
+  .header-soc-desktop {
+    display: none;
+  }
+  .header-inner {
+    padding: 0 12px;
+    gap: 8px;
+  }
+  .header-reg-btn {
+    padding: 6px 10px;
+    font-size: 10.5px;
+  }
 }
 
 /* Адаптивность шапки для мобильных устройств: ровная горизонтальная линия */
@@ -3060,25 +3109,6 @@ body.stage-mode .stage-floating-bar {
 
 /* 4. МОБИЛЬНЫЕ УСТРОЙСТВА (< 768px) */
 @media (max-width: 768px) {
-  .header-inner {
-    padding: 10px 14px;
-    flex-wrap: wrap;
-  }
-  .header-socials {
-    display: none;
-  }
-  .main-nav {
-    order: 3;
-    width: 100%;
-    justify-content: space-around;
-    border-top: 1px solid var(--border-subtle);
-    padding-top: 8px;
-    margin-top: 4px;
-  }
-  .nav-item {
-    font-size: 11px;
-    padding: 6px 10px;
-  }
   .players-editor-grid {
     grid-template-columns: 1fr;
   }
