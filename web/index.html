@@ -134,24 +134,43 @@
   <!-- ================= ГЛАВНАЯ СТРАНИЦА (/): ПОСТЕР СТРОГО ПО ЦЕНТРУ ================= -->
   <div id="page-home" class="page-view active">
     <div class="home-poster-viewport">
-      <!-- Постер турнира на весь экран строго по центру -->
-      <main class="home-full-poster-card">
-        <div class="poster-fullscreen-wrapper">
-          <div class="poster-glow-backdrop"></div>
-          <div class="poster-card-frame" onclick="openPosterModal()" title="Нажмите для открытия в полном окне">
-            <img 
-              id="home-main-image" 
-              class="poster-fullscreen-img" 
-              src="/img/main.jpg" 
-              alt="Mortal Kombat 1 Championship — Главный Постер" 
-              onerror="if (!this.src.endsWith('Artboard_4.jpg')) { this.src = '/img/Artboard_4.jpg'; }"
-            >
-            <div class="poster-overlay-hint">
-              <i class="fas fa-search-plus"></i> Просмотреть постер
+      <div class="home-poster-content-box">
+        <!-- Постер турнира на весь экран строго по центру -->
+        <main class="home-full-poster-card">
+          <div class="poster-fullscreen-wrapper">
+            <div class="poster-glow-backdrop"></div>
+            <div class="poster-card-frame" onclick="openPosterModal()" title="Нажмите для открытия в полном окне">
+              <img 
+                id="home-main-image" 
+                class="poster-fullscreen-img" 
+                src="/img/main.jpg" 
+                alt="Mortal Kombat 1 Championship — Главный Постер" 
+                onerror="if (!this.src.endsWith('Artboard_4.jpg')) { this.src = '/img/Artboard_4.jpg'; }"
+              >
+              <div class="poster-overlay-hint">
+                <i class="fas fa-search-plus"></i> Просмотреть постер
+              </div>
             </div>
           </div>
+        </main>
+
+        <!-- Отдельная кнопка REGISTRATION для мобильной версии -->
+        <div class="mobile-poster-cta-wrapper">
+          <a 
+            id="mobile-reg-cta-btn" 
+            href="https://t.me/comp_games_lovers_bot" 
+            target="_blank" 
+            class="mobile-reg-cta-btn" 
+            title="Регистрация на турнире в Telegram (@comp_games_lovers_bot)"
+          >
+            <span class="reg-cta-icon-wrap">
+              <i class="fab fa-telegram-plane"></i>
+            </span>
+            <span class="reg-cta-text">REGISTRATION</span>
+            <i class="fas fa-chevron-right reg-cta-arrow"></i>
+          </a>
         </div>
-      </main>
+      </div>
     </div>
   </div>
 

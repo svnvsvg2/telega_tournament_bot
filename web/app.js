@@ -369,6 +369,12 @@ function updateInfoUI(data) {
     headerReg.title = `Регистрация через Telegram (@${botUser})`;
   }
 
+  const mobileRegCta = document.getElementById("mobile-reg-cta-btn");
+  if (mobileRegCta) {
+    mobileRegCta.href = botUrl;
+    mobileRegCta.title = `Регистрация на турнире через Telegram (@${botUser})`;
+  }
+
   const detailTg = document.getElementById("detail-tg-btn");
   if (detailTg) {
     detailTg.href = botUrl;
