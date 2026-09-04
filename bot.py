@@ -19,7 +19,6 @@
 """
 import os
 import logging
-import threading
 from datetime import timedelta
 
 from telegram import (
@@ -45,7 +44,6 @@ from telegram.ext import (
 
 import config
 import database as db
-import server
 
 
 logging.basicConfig(
@@ -460,8 +458,10 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def bracket_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     url = config.WEB_URL
-    buttons = [[InlineKeyboardButton("🌐 Открыть сетку на сайте", url=url)]]
-    reply_markup = InlineKeyboardMarkup(buttons)
+    reply_markup = None
+    if url and not ("localhost" in url or "127.0.0.1" in url):
+        buttons = [[InlineKeyboardButton("🌐 Открыть сетку на сайте", url=url)]]
+        reply_markup = InlineKeyboardMarkup(buttons)
     await update.message.reply_text(
         f"🏆 <b>Интерактивная сетка турнира {config.TOURNAMENT_NAME}:</b>\n\n"
         f"Смотрите результаты матчей, расписание и прогресс турнира в реальном времени на нашем сайте:\n"
@@ -549,9 +549,6 @@ def main():
         logger.warning("BOT_TOKEN не заполнен в файле .env!")
 
     db.init_db()
-
-    # Запуск веб-сервера турнирного сайта в отдельном фоновом потоке
-    threading.Thread(target=server.run_web_server, daemon=True).start()
 
     application = ApplicationBuilder().token(config.BOT_TOKEN).post_init(post_init).build()
 

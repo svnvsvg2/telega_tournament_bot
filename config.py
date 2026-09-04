@@ -14,6 +14,8 @@ BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 ADMIN_IDS = [int(x) for x in os.getenv("ADMIN_IDS", "").split(",") if x.strip()]
 
 ORGANIZER_USERNAME = os.getenv("ORGANIZER_USERNAME", "").replace("@", "").strip()
+BOT_USERNAME = os.getenv("BOT_USERNAME", "comp_games_lovers_bot").replace("@", "").strip()
+BOT_URL = f"https://t.me/{BOT_USERNAME}"
 
 ORGANIZATION_NAME = os.getenv("ORGANIZATION_NAME", "DARACYBER")
 TOURNAMENT_NAME = os.getenv("TOURNAMENT_NAME", "DARACYBER Mortal Kombat 1 Championship")
@@ -36,9 +38,9 @@ CONFIRMATION_CHECK_HOURS_AFTER = int(os.getenv("CONFIRMATION_CHECK_HOURS_AFTER",
 MAX_PARTICIPANTS = int(os.getenv("MAX_PARTICIPANTS", "16"))
 
 ADMIN_LOGIN = os.getenv("ADMIN_LOGIN", "admin")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
-ADMIN_PIN = os.getenv("ADMIN_PIN", "1234")
-WEB_PORT = int(os.getenv("WEB_PORT", "5000"))
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "4321")
+ADMIN_PIN = os.getenv("ADMIN_PIN", "4321")
+WEB_PORT = int(os.getenv("PORT", os.getenv("WEB_PORT", "8088")))
 WEB_URL = os.getenv("WEB_URL", f"http://localhost:{WEB_PORT}")
 
 

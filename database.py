@@ -1,7 +1,9 @@
 """
-Слой работы с базой данных (SQLite).
+Слой работы с базой данных (SQLite / PostgreSQL).
 Хранит зарегистрированных участников турнира, статус подтверждения и турнирную сетку.
+Автоматически переключается на PostgreSQL, если задана переменная DATABASE_URL (например, на Heroku).
 """
+import os
 import sqlite3
 import random
 from contextlib import closing
@@ -9,103 +11,184 @@ from datetime import datetime
 
 DB_PATH = "participants.db"
 
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+IS_POSTGRES = bool(DATABASE_URL)
+
+if IS_POSTGRES:
+    import psycopg2
+    import psycopg2.extras
+
+
+def get_connection():
+    if IS_POSTGRES:
+        conn = psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
+        conn.autocommit = False
+        return conn
+    else:
+        conn = sqlite3.connect(DB_PATH, timeout=10.0)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA journal_mode = WAL")
+        conn.execute("PRAGMA synchronous = NORMAL")
+        return conn
+
+
+def _format_sql(sql: str) -> str:
+    if IS_POSTGRES:
+        return sql.replace("?", "%s")
+    return sql
+
+
+def _execute(conn, sql: str, params=None):
+    formatted_sql = _format_sql(sql)
+    if IS_POSTGRES:
+        cur = conn.cursor()
+        cur.execute(formatted_sql, params or ())
+        return cur
+    else:
+        if params:
+            return conn.execute(formatted_sql, params)
+        return conn.execute(formatted_sql)
+
+
+def _fetchone(conn, sql: str, params=None):
+    cur = _execute(conn, sql, params)
+    res = cur.fetchone()
+    if IS_POSTGRES:
+        cur.close()
+    return res
+
+
+def _fetchall(conn, sql: str, params=None):
+    cur = _execute(conn, sql, params)
+    res = cur.fetchall()
+    if IS_POSTGRES:
+        cur.close()
+    return res
+
 
 def init_db():
-    with closing(sqlite3.connect(DB_PATH)) as conn:
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS participants (
-                telegram_id INTEGER PRIMARY KEY,
-                username TEXT,
-                name TEXT NOT NULL,
-                nickname TEXT NOT NULL,
-                registered_at TEXT NOT NULL,
-                confirmed INTEGER DEFAULT 0,
-                confirmed_at TEXT
+    with closing(get_connection()) as conn:
+        if IS_POSTGRES:
+            _execute(
+                conn,
+                """
+                CREATE TABLE IF NOT EXISTS participants (
+                    telegram_id BIGINT PRIMARY KEY,
+                    username TEXT,
+                    name TEXT NOT NULL,
+                    nickname TEXT NOT NULL,
+                    registered_at TEXT NOT NULL,
+                    confirmed INTEGER DEFAULT 0,
+                    confirmed_at TEXT
+                )
+                """,
             )
-            """
-        )
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS matches (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                round INTEGER NOT NULL,
-                match_number INTEGER NOT NULL,
-                player1_name TEXT,
-                player1_nickname TEXT,
-                player2_name TEXT,
-                player2_nickname TEXT,
-                score1 INTEGER DEFAULT 0,
-                score2 INTEGER DEFAULT 0,
-                winner_slot INTEGER DEFAULT 0,
-                status TEXT DEFAULT 'pending',
-                next_match_id INTEGER,
-                next_match_slot INTEGER DEFAULT 1,
-                loser_match_id INTEGER,
-                loser_match_slot INTEGER DEFAULT 1,
-                bracket_type TEXT DEFAULT 'winners'
+            _execute(
+                conn,
+                """
+                CREATE TABLE IF NOT EXISTS matches (
+                    id INTEGER PRIMARY KEY,
+                    round INTEGER NOT NULL,
+                    match_number INTEGER NOT NULL,
+                    player1_name TEXT,
+                    player1_nickname TEXT,
+                    player2_name TEXT,
+                    player2_nickname TEXT,
+                    score1 INTEGER DEFAULT 0,
+                    score2 INTEGER DEFAULT 0,
+                    winner_slot INTEGER DEFAULT 0,
+                    status TEXT DEFAULT 'pending',
+                    next_match_id INTEGER,
+                    next_match_slot INTEGER DEFAULT 1,
+                    loser_match_id INTEGER,
+                    loser_match_slot INTEGER DEFAULT 1,
+                    bracket_type TEXT DEFAULT 'winners'
+                )
+                """,
             )
-            """
-        )
-        # Миграция колонок для существующей БД
-        for col, col_def in [
-            ("loser_match_id", "INTEGER"),
-            ("loser_match_slot", "INTEGER DEFAULT 1"),
-            ("bracket_type", "TEXT DEFAULT 'winners'"),
-        ]:
-            try:
-                conn.execute(f"ALTER TABLE matches ADD COLUMN {col} {col_def}")
-            except sqlite3.OperationalError:
-                pass
+        else:
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS participants (
+                    telegram_id INTEGER PRIMARY KEY,
+                    username TEXT,
+                    name TEXT NOT NULL,
+                    nickname TEXT NOT NULL,
+                    registered_at TEXT NOT NULL,
+                    confirmed INTEGER DEFAULT 0,
+                    confirmed_at TEXT
+                )
+                """
+            )
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS matches (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    round INTEGER NOT NULL,
+                    match_number INTEGER NOT NULL,
+                    player1_name TEXT,
+                    player1_nickname TEXT,
+                    player2_name TEXT,
+                    player2_nickname TEXT,
+                    score1 INTEGER DEFAULT 0,
+                    score2 INTEGER DEFAULT 0,
+                    winner_slot INTEGER DEFAULT 0,
+                    status TEXT DEFAULT 'pending',
+                    next_match_id INTEGER,
+                    next_match_slot INTEGER DEFAULT 1,
+                    loser_match_id INTEGER,
+                    loser_match_slot INTEGER DEFAULT 1,
+                    bracket_type TEXT DEFAULT 'winners'
+                )
+                """
+            )
         conn.commit()
 
 
 def count_participants() -> int:
-    with closing(sqlite3.connect(DB_PATH)) as conn:
-        cur = conn.execute("SELECT COUNT(*) FROM participants")
-        return cur.fetchone()[0]
+    with closing(get_connection()) as conn:
+        row = _fetchone(conn, "SELECT COUNT(*) as cnt FROM participants")
+        if row:
+            return row["cnt"] if isinstance(row, dict) or hasattr(row, "keys") else row[0]
+        return 0
 
 
 def add_participant(telegram_id: int, username: str, name: str, nickname: str):
-    with closing(sqlite3.connect(DB_PATH)) as conn:
-        conn.execute(
-            """
+    with closing(get_connection()) as conn:
+        sql = """
             INSERT INTO participants (telegram_id, username, name, nickname, registered_at, confirmed)
             VALUES (?, ?, ?, ?, ?, 0)
             ON CONFLICT(telegram_id) DO UPDATE SET
-                username=excluded.username,
-                name=excluded.name,
-                nickname=excluded.nickname
-            """,
-            (telegram_id, username, name, nickname, datetime.now().isoformat()),
-        )
+                username=EXCLUDED.username,
+                name=EXCLUDED.name,
+                nickname=EXCLUDED.nickname
+        """
+        _execute(conn, sql, (telegram_id, username, name, nickname, datetime.now().isoformat()))
         conn.commit()
 
 
 def get_participant(telegram_id: int):
-    with closing(sqlite3.connect(DB_PATH)) as conn:
-        conn.row_factory = sqlite3.Row
-        cur = conn.execute("SELECT * FROM participants WHERE telegram_id=?", (telegram_id,))
-        return cur.fetchone()
+    with closing(get_connection()) as conn:
+        return _fetchone(conn, "SELECT * FROM participants WHERE telegram_id=?", (telegram_id,))
 
 
 def get_all_participants():
-    with closing(sqlite3.connect(DB_PATH)) as conn:
-        conn.row_factory = sqlite3.Row
-        cur = conn.execute("SELECT * FROM participants ORDER BY registered_at")
-        return cur.fetchall()
+    with closing(get_connection()) as conn:
+        return _fetchall(conn, "SELECT * FROM participants ORDER BY registered_at")
 
 
 def get_unconfirmed():
-    with closing(sqlite3.connect(DB_PATH)) as conn:
-        conn.row_factory = sqlite3.Row
-        cur = conn.execute("SELECT * FROM participants WHERE confirmed=0")
-        return cur.fetchall()
+    with closing(get_connection()) as conn:
+        return _fetchall(conn, "SELECT * FROM participants WHERE confirmed=0")
 
 
 def set_confirmed(telegram_id: int, confirmed: bool):
-    with closing(sqlite3.connect(DB_PATH)) as conn:
-        conn.execute(
+    with closing(get_connection()) as conn:
+        _execute(
+            conn,
             "UPDATE participants SET confirmed=?, confirmed_at=? WHERE telegram_id=?",
             (1 if confirmed else 0, datetime.now().isoformat() if confirmed else None, telegram_id),
         )
@@ -113,16 +196,16 @@ def set_confirmed(telegram_id: int, confirmed: bool):
 
 
 def remove_participant(telegram_id: int):
-    with closing(sqlite3.connect(DB_PATH)) as conn:
-        conn.execute("DELETE FROM participants WHERE telegram_id=?", (telegram_id,))
+    with closing(get_connection()) as conn:
+        _execute(conn, "DELETE FROM participants WHERE telegram_id=?", (telegram_id,))
         conn.commit()
 
 
 def reset_all():
     """Полностью очищает таблицу участников и сетку."""
-    with closing(sqlite3.connect(DB_PATH)) as conn:
-        conn.execute("DELETE FROM participants")
-        conn.execute("DELETE FROM matches")
+    with closing(get_connection()) as conn:
+        _execute(conn, "DELETE FROM participants")
+        _execute(conn, "DELETE FROM matches")
         conn.commit()
 
 
@@ -146,11 +229,12 @@ def seed_test_players():
         ("Денис", "Geras_Time", "sands_denis"),
         ("Кирилл", "Kabal_Speed", "dash_kirill"),
     ]
-    with closing(sqlite3.connect(DB_PATH)) as conn:
-        conn.execute("DELETE FROM participants")
+    with closing(get_connection()) as conn:
+        _execute(conn, "DELETE FROM participants")
         now = datetime.now().isoformat()
         for idx, (name, nick, tg_user) in enumerate(test_players, start=1):
-            conn.execute(
+            _execute(
+                conn,
                 """
                 INSERT INTO participants (telegram_id, username, name, nickname, registered_at, confirmed, confirmed_at)
                 VALUES (?, ?, ?, ?, ?, 1, ?)
@@ -161,6 +245,31 @@ def seed_test_players():
 
     generate_bracket(shuffle=True)
     return True
+
+
+def import_players(players_list: list):
+    """
+    Импортирует пользовательский список игроков и формирует турнирную сетку.
+    players_list: список словарей [{"name": "Имя", "nickname": "Никнейм"}, ...]
+    """
+    with closing(get_connection()) as conn:
+        _execute(conn, "DELETE FROM participants")
+        now = datetime.now().isoformat()
+        for idx, player in enumerate(players_list, start=1):
+            name = player.get("name", f"Игрок {idx}").strip() or f"Игрок {idx}"
+            nickname = player.get("nickname", f"Player_{idx}").strip() or f"Player_{idx}"
+            _execute(
+                conn,
+                """
+                INSERT INTO participants (telegram_id, username, name, nickname, registered_at, confirmed, confirmed_at)
+                VALUES (?, ?, ?, ?, ?, 1, ?)
+                """,
+                (9000 + idx, f"imported_{idx}", name, nickname, now, now),
+            )
+        conn.commit()
+
+    generate_bracket(shuffle=True)
+    return len(players_list)
 
 
 def export_to_csv(filepath: str = "participants_export.csv") -> str:
@@ -184,22 +293,12 @@ def export_to_csv(filepath: str = "participants_export.csv") -> str:
     return filepath
 
 
-# ---------- Логика турнирной сетки (Double Elimination) ----------
-
 def generate_bracket(shuffle: bool = True):
-    """
-    Генерирует турнирную сетку на 16 участников по системе Double Elimination.
-    Все матчи Bo1, Гранд-Финал Bo5.
-    Матчи 1..15: Верхняя сетка (WB)
-    Матчи 16..29: Сетка Лузеров (LB)
-    Матч 30: Гранд-Финал (GF)
-    Матч 31: Сброс Сетки (Reset)
-    """
-    with closing(sqlite3.connect(DB_PATH)) as conn:
-        conn.execute("DELETE FROM matches")
+    with closing(get_connection()) as conn:
+        _execute(conn, "DELETE FROM matches")
 
-        cur = conn.execute("SELECT name, nickname FROM participants")
-        players = list(cur.fetchall())
+        cur_rows = _fetchall(conn, "SELECT name, nickname FROM participants")
+        players = [(r["name"], r["nickname"]) for r in cur_rows]
 
         if shuffle:
             random.shuffle(players)
@@ -207,9 +306,6 @@ def generate_bracket(shuffle: bool = True):
         while len(players) < 16:
             players.append(("BYE / TBD", f"Участник {len(players)+1}"))
 
-        # --- 1. ВЕРХНЯЯ СЕТКА (WINNERS BRACKET) ---
-        # WB R1 (1/8 финала WB): Матчи 1..8
-        # Победители -> М9..М12 (slot 1 или 2), Проигравшие -> М16..М19 (slot 1 или 2)
         for i in range(8):
             p1_name, p1_nick = players[i * 2]
             p2_name, p2_nick = players[i * 2 + 1]
@@ -219,7 +315,8 @@ def generate_bracket(shuffle: bool = True):
             loser_m = 16 + (i // 2)
             loser_slot = 1 if (i % 2 == 0) else 2
 
-            conn.execute(
+            _execute(
+                conn,
                 """
                 INSERT INTO matches (id, round, match_number, player1_name, player1_nickname, player2_name, player2_nickname, status, next_match_id, next_match_slot, loser_match_id, loser_match_slot, bracket_type)
                 VALUES (?, 1, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, 'winners')
@@ -227,8 +324,6 @@ def generate_bracket(shuffle: bool = True):
                 (m_id, i + 1, p1_name, p1_nick, p2_name, p2_nick, next_m, next_slot, loser_m, loser_slot),
             )
 
-        # WB R2 (1/4 финала WB): Матчи 9..12
-        # Победители -> М13, М14. Проигравшие -> М20..М23 (slot 2)
         wb_r2_config = [
             (9, 1, 13, 1, 20, 2),
             (10, 2, 13, 2, 21, 2),
@@ -236,7 +331,8 @@ def generate_bracket(shuffle: bool = True):
             (12, 4, 14, 2, 23, 2),
         ]
         for m_id, m_num, next_m, next_s, loser_m, loser_s in wb_r2_config:
-            conn.execute(
+            _execute(
+                conn,
                 """
                 INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, loser_match_id, loser_match_slot, bracket_type)
                 VALUES (?, 2, ?, 'pending', ?, ?, ?, ?, 'winners')
@@ -244,60 +340,42 @@ def generate_bracket(shuffle: bool = True):
                 (m_id, m_num, next_m, next_s, loser_m, loser_s),
             )
 
-        # WB R3 (1/2 финала WB): Матчи 13, 14
-        # Победители -> М15. Проигравшие -> М26, М27 (slot 2)
-        conn.execute("INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, loser_match_id, loser_match_slot, bracket_type) VALUES (13, 3, 1, 'pending', 15, 1, 26, 2, 'winners')")
-        conn.execute("INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, loser_match_id, loser_match_slot, bracket_type) VALUES (14, 3, 2, 'pending', 15, 2, 27, 2, 'winners')")
+        _execute(conn, "INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, loser_match_id, loser_match_slot, bracket_type) VALUES (13, 3, 1, 'pending', 15, 1, 26, 2, 'winners')")
+        _execute(conn, "INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, loser_match_id, loser_match_slot, bracket_type) VALUES (14, 3, 2, 'pending', 15, 2, 27, 2, 'winners')")
+        _execute(conn, "INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, loser_match_id, loser_match_slot, bracket_type) VALUES (15, 4, 1, 'pending', 30, 1, 29, 2, 'winners')")
 
-        # WB R4 (Финал WB): Матч 15
-        # Победитель -> М30 (slot 1). Проигравший -> М29 (slot 2)
-        conn.execute("INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, loser_match_id, loser_match_slot, bracket_type) VALUES (15, 4, 1, 'pending', 30, 1, 29, 2, 'winners')")
-
-        # --- 2. СЕТКА ЛУЗЕРОВ (LOSERS BRACKET) ---
-        # LB R1: Матчи 16..19 (проигравшие из WB R1) -> ведут в LB R2 (М20..М23 slot 1)
         for i in range(4):
             m_id = 16 + i
-            conn.execute(
+            _execute(
+                conn,
                 "INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (?, 1, ?, 'pending', ?, 1, 'losers')",
                 (m_id, i + 1, 20 + i),
             )
 
-        # LB R2: Матчи 20..23 (победители LB R1 vs проигравшие WB R2) -> ведут в LB R3 (М24, М25)
-        conn.execute("INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (20, 2, 1, 'pending', 24, 1, 'losers')")
-        conn.execute("INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (21, 2, 2, 'pending', 24, 2, 'losers')")
-        conn.execute("INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (22, 2, 3, 'pending', 25, 1, 'losers')")
-        conn.execute("INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (23, 2, 4, 'pending', 25, 2, 'losers')")
+        _execute(conn, "INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (20, 2, 1, 'pending', 24, 1, 'losers')")
+        _execute(conn, "INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (21, 2, 2, 'pending', 24, 2, 'losers')")
+        _execute(conn, "INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (22, 2, 3, 'pending', 25, 1, 'losers')")
+        _execute(conn, "INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (23, 2, 4, 'pending', 25, 2, 'losers')")
 
-        # LB R3: Матчи 24, 25 (победители LB R2) -> ведут в LB R4 (М26, М27 slot 1)
-        conn.execute("INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (24, 3, 1, 'pending', 26, 1, 'losers')")
-        conn.execute("INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (25, 3, 2, 'pending', 27, 1, 'losers')")
+        _execute(conn, "INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (24, 3, 1, 'pending', 26, 1, 'losers')")
+        _execute(conn, "INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (25, 3, 2, 'pending', 27, 1, 'losers')")
 
-        # LB R4: Матчи 26, 27 (победители LB R3 vs проигравшие WB R3) -> ведут в LB R5 (М28)
-        conn.execute("INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (26, 4, 1, 'pending', 28, 1, 'losers')")
-        conn.execute("INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (27, 4, 2, 'pending', 28, 2, 'losers')")
+        _execute(conn, "INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (26, 4, 1, 'pending', 28, 1, 'losers')")
+        _execute(conn, "INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (27, 4, 2, 'pending', 28, 2, 'losers')")
 
-        # LB R5 (Полуфинал LB): Матч 28 -> ведет в LB R6 (М29 slot 1)
-        conn.execute("INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (28, 5, 1, 'pending', 29, 1, 'losers')")
+        _execute(conn, "INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (28, 5, 1, 'pending', 29, 1, 'losers')")
+        _execute(conn, "INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (29, 6, 1, 'pending', 30, 2, 'losers')")
 
-        # LB R6 (Финал LB): Матч 29 (победитель LB R5 vs проигравший WB Final M15) -> ведет в Гранд-Финал (М30 slot 2)
-        conn.execute("INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (29, 6, 1, 'pending', 30, 2, 'losers')")
-
-        # --- 3. ГРАНД-ФИНАЛ И СБРОС СЕТКИ ---
-        # Гранд-Финал M30 (Bo5)
-        conn.execute("INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (30, 1, 1, 'pending', 31, 1, 'grand_final')")
-
-        # Сброс Сетки M31 (Bo5) - активен только если финалист лузеров побеждает в M30
-        conn.execute("INSERT INTO matches (id, round, match_number, status, bracket_type) VALUES (31, 1, 1, 'pending', 'reset')")
+        _execute(conn, "INSERT INTO matches (id, round, match_number, status, next_match_id, next_match_slot, bracket_type) VALUES (30, 1, 1, 'pending', 31, 1, 'grand_final')")
+        _execute(conn, "INSERT INTO matches (id, round, match_number, status, bracket_type) VALUES (31, 1, 1, 'pending', 'reset')")
 
         conn.commit()
 
 
 def get_all_matches():
-    """Возвращает все матчи, разделенные по типам сеток и раундам."""
-    with closing(sqlite3.connect(DB_PATH)) as conn:
-        conn.row_factory = sqlite3.Row
-        cur = conn.execute("SELECT * FROM matches ORDER BY id")
-        rows = [dict(r) for r in cur.fetchall()]
+    with closing(get_connection()) as conn:
+        rows = _fetchall(conn, "SELECT * FROM matches ORDER BY id")
+        dict_rows = [dict(r) for r in rows]
 
         bracket = {
             "winners": {1: [], 2: [], 3: [], 4: []},
@@ -306,7 +384,7 @@ def get_all_matches():
             "reset": [],
         }
 
-        for r in rows:
+        for r in dict_rows:
             b_type = r.get("bracket_type", "winners")
             rnd = r.get("round", 1)
             if b_type == "winners":
@@ -336,11 +414,8 @@ def update_match(
     player2_name: str = None,
     player2_nickname: str = None,
 ):
-    """Обновляет счёт, статус и участников матча. Автоматически продвигает победителя и переводит проигравшего."""
-    with closing(sqlite3.connect(DB_PATH)) as conn:
-        conn.row_factory = sqlite3.Row
-        cur = conn.execute("SELECT * FROM matches WHERE id=?", (match_id,))
-        m = cur.fetchone()
+    with closing(get_connection()) as conn:
+        m = _fetchone(conn, "SELECT * FROM matches WHERE id=?", (match_id,))
         if not m:
             return None
 
@@ -349,7 +424,8 @@ def update_match(
         p2_name = player2_name if player2_name is not None else m["player2_name"]
         p2_nick = player2_nickname if player2_nickname is not None else m["player2_nickname"]
 
-        conn.execute(
+        _execute(
+            conn,
             """
             UPDATE matches SET
                 player1_name=?, player1_nickname=?,
@@ -360,8 +436,7 @@ def update_match(
             (p1_name, p1_nick, p2_name, p2_nick, score1, score2, status, winner_slot, match_id),
         )
 
-        cur = conn.execute("SELECT * FROM matches WHERE id=?", (match_id,))
-        m = cur.fetchone()
+        m = _fetchone(conn, "SELECT * FROM matches WHERE id=?", (match_id,))
 
         winner_name, winner_nick = None, None
         loser_name, loser_nick = None, None
@@ -373,44 +448,45 @@ def update_match(
             winner_name, winner_nick = m["player2_name"], m["player2_nickname"]
             loser_name, loser_nick = m["player1_name"], m["player1_nickname"]
 
-        # Продвижение участников при завершении матча
         if status == "completed" and winner_slot > 0:
-            # 1. Продвижение победителя в следующую стадию
             if m["next_match_id"]:
                 next_id = m["next_match_id"]
                 slot = m["next_match_slot"]
                 if slot == 1:
-                    conn.execute(
+                    _execute(
+                        conn,
                         "UPDATE matches SET player1_name=?, player1_nickname=? WHERE id=?",
                         (winner_name, winner_nick, next_id),
                     )
                 else:
-                    conn.execute(
+                    _execute(
+                        conn,
                         "UPDATE matches SET player2_name=?, player2_nickname=? WHERE id=?",
                         (winner_name, winner_nick, next_id),
                     )
 
-            # 2. Перевод проигравшего из Верхней сетки в Сетку Лузеров
             if m["loser_match_id"]:
                 loser_id = m["loser_match_id"]
                 l_slot = m["loser_match_slot"]
                 if l_slot == 1:
-                    conn.execute(
+                    _execute(
+                        conn,
                         "UPDATE matches SET player1_name=?, player1_nickname=? WHERE id=?",
                         (loser_name, loser_nick, loser_id),
                     )
                 else:
-                    conn.execute(
+                    _execute(
+                        conn,
                         "UPDATE matches SET player2_name=?, player2_nickname=? WHERE id=?",
                         (loser_name, loser_nick, loser_id),
                     )
 
-            # 3. Особая логика Гранд-Финала (Матч 30) -> Сброс Сетки (Матч 31)
             if match_id == 30:
                 if winner_slot == 1:
-                    conn.execute("UPDATE matches SET status='not_needed' WHERE id=31")
+                    _execute(conn, "UPDATE matches SET status='not_needed' WHERE id=31")
                 elif winner_slot == 2:
-                    conn.execute(
+                    _execute(
+                        conn,
                         """
                         UPDATE matches SET
                             player1_name=?, player1_nickname=?,
@@ -426,7 +502,6 @@ def update_match(
 
 
 def reset_bracket():
-    """Очищает сетку матчей."""
-    with closing(sqlite3.connect(DB_PATH)) as conn:
-        conn.execute("DELETE FROM matches")
+    with closing(get_connection()) as conn:
+        _execute(conn, "DELETE FROM matches")
         conn.commit()
