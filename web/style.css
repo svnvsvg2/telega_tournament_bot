@@ -636,81 +636,125 @@ body.view-admin .header-inner {
   }
 }
 
-/* Адаптивность шапки для мобильных устройств: ровная горизонтальная линия */
+/* Адаптивность шапки для мобильных устройств: логотип слева, боковые кнопки вертикальным списком справа */
 @media (max-width: 768px) {
   .site-header {
-    height: 60px;
+    height: auto;
+    min-height: 64px;
   }
-  .header-inner {
+  .header-inner,
+  body.view-tournament .header-inner,
+  body.view-admin .header-inner {
     width: 100%;
     max-width: 100%;
-    padding: 0 12px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    padding: 6px 12px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
     align-items: center;
-    height: 60px;
-    gap: 8px;
+    column-gap: 10px;
+    row-gap: 5px;
+    height: auto;
     position: relative;
     box-sizing: border-box;
   }
-  .header-left-menu {
-    display: flex;
-    align-items: center;
-    margin: 0;
-    z-index: 10;
-  }
-  .tourney-dropdown-btn {
-    padding: 6px 10px;
-    font-size: 11px;
-    gap: 6px;
-  }
+
+  /* Логотип строго слева, никогда не перекрывается кнопками */
   .header-center-logo {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    position: static;
+    transform: none;
+    justify-self: start;
     z-index: 5;
+    margin: 0;
   }
   .brand-logo {
     gap: 8px;
   }
   .brand-emblem {
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
   }
   .brand-name {
     font-size: 14px;
     letter-spacing: 0.8px;
+    white-space: nowrap;
   }
   .brand-tag {
     font-size: 6.5px;
     letter-spacing: 1px;
+    white-space: nowrap;
   }
-  .header-right-socials {
+
+  /* Боковые кнопки: вертикальный аккуратный список справа */
+  .header-left-menu {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
     display: flex;
     align-items: center;
     margin: 0;
-    margin-left: auto;
+    z-index: 15;
+  }
+  .header-right-socials {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    margin: 0;
     z-index: 10;
   }
-  .header-reg-btn {
-    padding: 6px 10px;
-    font-size: 11px;
-    gap: 5px;
-    letter-spacing: 0.6px;
+  .header-socials {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0;
   }
+  .tourney-dropdown-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  /* Кнопки списка: одинаковый аккуратный размер и выравнивание */
+  .tourney-dropdown-btn,
+  .header-reg-btn {
+    width: 130px;
+    height: 26px;
+    padding: 0 8px;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    white-space: nowrap;
+    border-radius: var(--radius-sm);
+  }
+  .tourney-dropdown-btn {
+    gap: 6px;
+  }
+  .header-reg-btn {
+    gap: 6px;
+  }
+
   .header-soc-desktop {
-    display: none;
+    display: none !important;
   }
   .header-socials-divider {
-    display: none;
+    display: none !important;
   }
+
+  /* Выпадающее меню турнира: раскрывается строго под кнопкой */
   .tourney-dropdown-panel {
-    top: calc(100% + 8px);
-    left: 12px;
-    right: auto;
-    width: calc(100vw - 24px);
+    top: calc(100% + 6px);
+    right: 0;
+    left: auto;
+    width: min(calc(100vw - 24px), 320px);
     max-width: 320px;
     transform: translateY(-8px) scale(0.97);
   }
@@ -726,9 +770,15 @@ body.view-admin .header-inner {
   .reg-text-long { display: none !important; }
   .reg-text-short { display: inline !important; }
   .brand-tag { display: none !important; }
-  .brand-name { font-size: 12px !important; }
-  .tourney-dropdown-btn { padding: 4px 6px !important; font-size: 10px !important; }
-  .header-reg-btn { padding: 4px 6px !important; font-size: 10px !important; }
+  .brand-name { font-size: 13px !important; }
+  .tourney-dropdown-btn,
+  .header-reg-btn {
+    width: 100px;
+    height: 25px;
+    padding: 0 6px !important;
+    font-size: 10px !important;
+    gap: 4px;
+  }
 }
 
 @media (min-width: 361px) {

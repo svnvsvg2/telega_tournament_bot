@@ -1,16 +1,22 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DARACYBER — Mortal Kombat 1 Championship</title>
-  <meta name="description" content="Турнир по Mortal Kombat 1 от DARACYBER ESPORTS. Double Elimination, 16 игроков, обновление результатов в реальном времени.">
+  <meta name="description"
+    content="Турнир по Mortal Kombat 1 от DARACYBER ESPORTS. Double Elimination, 16 игроков, обновление результатов в реальном времени.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    crossorigin="anonymous">
   <link rel="stylesheet" href="/style.css">
 </head>
+
 <body>
 
   <!-- ================= ШАПКА: ВЫПЛЫВАЮЩЕЕ МЕНЮ СЛЕВА, ЛОГО ПО ЦЕНТРУ, СОЦСЕТИ СПРАВА ================= -->
@@ -20,7 +26,8 @@
       <!-- Левая часть: Выплывающее меню турнира (слева относительно логотипа) -->
       <div class="header-left-menu">
         <div class="tourney-dropdown-wrapper" id="tourney-dropdown-wrapper">
-          <button class="tourney-dropdown-btn" id="tourney-dropdown-trigger" onclick="toggleTourneyDropdown(event)" aria-haspopup="true" aria-expanded="false" title="Открыть Меню Турнира">
+          <button class="tourney-dropdown-btn" id="tourney-dropdown-trigger" onclick="toggleTourneyDropdown(event)"
+            aria-haspopup="true" aria-expanded="false" title="Открыть Меню Турнира">
             <i class="fas fa-bars"></i>
             <span class="dropdown-trigger-text">
               <span class="text-long">МЕНЮ ТУРНИРА</span>
@@ -56,7 +63,8 @@
                 </div>
               </button>
 
-              <a id="dropdown-tg-btn" href="https://t.me/comp_games_lovers_bot" target="_blank" class="dropdown-item item-tg">
+              <a id="dropdown-tg-btn" href="https://t.me/comp_games_lovers_bot" target="_blank"
+                class="dropdown-item item-tg">
                 <div class="dropdown-item-icon icon-tg"><i class="fab fa-telegram-plane"></i></div>
                 <div class="dropdown-item-info">
                   <span class="dropdown-item-title">Регистрация в Telegram</span>
@@ -77,8 +85,10 @@
             <div class="dropdown-socials-row">
               <span class="dropdown-socials-label">МЕДИА И СТРИМЫ:</span>
               <div class="dropdown-socials-links">
-                <a href="https://twitch.tv" target="_blank" title="Twitch" class="dropdown-soc-link"><i class="fab fa-twitch"></i> Twitch</a>
-                <a href="https://youtube.com" target="_blank" title="YouTube" class="dropdown-soc-link"><i class="fab fa-youtube"></i> YouTube</a>
+                <a href="https://twitch.com/arsenaktv" target="_blank" title="Twitch" class="dropdown-soc-link"><i
+                    class="fab fa-twitch"></i> Twitch</a>
+                <a href="https://www.youtube.com/@arsenakchannel" target="_blank" title="YouTube"
+                  class="dropdown-soc-link"><i class="fab fa-youtube"></i> YouTube</a>
               </div>
             </div>
 
@@ -95,10 +105,10 @@
         <a href="/" class="brand-logo" onclick="event.preventDefault(); showHome();" title="DARACYBER — На Главную">
           <div class="brand-emblem">
             <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="brand-icon">
-              <path d="M16 2L2 10L16 18L30 10L16 2Z" fill="#f3f4f6"/>
-              <path d="M2 14L16 22L30 14" stroke="#f3f4f6" stroke-width="2.5" stroke-linecap="round"/>
-              <path d="M2 18L16 26L30 18" stroke="#9ca3af" stroke-width="2.5" stroke-linecap="round"/>
-              <path d="M16 2L16 26" stroke="#4b5563" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2 2"/>
+              <path d="M16 2L2 10L16 18L30 10L16 2Z" fill="#f3f4f6" />
+              <path d="M2 14L16 22L30 14" stroke="#f3f4f6" stroke-width="2.5" stroke-linecap="round" />
+              <path d="M2 18L16 26L30 18" stroke="#9ca3af" stroke-width="2.5" stroke-linecap="round" />
+              <path d="M16 2L16 26" stroke="#4b5563" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2 2" />
             </svg>
           </div>
           <div class="brand-text">
@@ -111,13 +121,16 @@
       <!-- Правая часть: Кнопка REGISTRATION и соцсети (выровнены по правому краю постера) -->
       <div class="header-right-socials">
         <div class="header-socials">
-          <a id="header-reg-btn" href="https://t.me/comp_games_lovers_bot" target="_blank" title="Регистрация в Telegram (@comp_games_lovers_bot)" class="header-reg-btn">
+          <a id="header-reg-btn" href="https://t.me/comp_games_lovers_bot" target="_blank"
+            title="Регистрация в Telegram (@comp_games_lovers_bot)" class="header-reg-btn">
             <i class="fab fa-telegram-plane"></i>
             <span class="reg-text-long">REGISTRATION</span>
             <span class="reg-text-short">REG</span>
           </a>
-          <a href="https://twitch.tv" target="_blank" title="Twitch" class="social-link header-soc-desktop"><i class="fab fa-twitch"></i></a>
-          <a href="https://youtube.com" target="_blank" title="YouTube" class="social-link header-soc-desktop"><i class="fab fa-youtube"></i></a>
+          <a href="https://twitch.com/arsenaktv" target="_blank" title="Twitch" class="social-link header-soc-desktop"><i
+              class="fab fa-twitch"></i></a>
+          <a href="https://www.youtube.com/@arsenakchannel" target="_blank" title="YouTube" class="social-link header-soc-desktop"><i
+              class="fab fa-youtube"></i></a>
         </div>
       </div>
 
@@ -139,14 +152,12 @@
         <main class="home-full-poster-card">
           <div class="poster-fullscreen-wrapper">
             <div class="poster-glow-backdrop"></div>
-            <div class="poster-card-frame" onclick="showTournament('bracket')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); showTournament('bracket'); }" tabindex="0" role="button" title="Перейти к турниру (Сетка, Участники, Регламент)">
-              <img 
-                id="home-main-image" 
-                class="poster-fullscreen-img" 
-                src="/img/main.jpg" 
-                alt="Mortal Kombat 1 Championship — Главный Постер" 
-                onerror="if (!this.src.endsWith('Artboard_4.jpg')) { this.src = '/img/Artboard_4.jpg'; }"
-              >
+            <div class="poster-card-frame" onclick="showTournament('bracket')"
+              onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); showTournament('bracket'); }"
+              tabindex="0" role="button" title="Перейти к турниру (Сетка, Участники, Регламент)">
+              <img id="home-main-image" class="poster-fullscreen-img" src="/img/main.jpg"
+                alt="Mortal Kombat 1 Championship — Главный Постер"
+                onerror="if (!this.src.endsWith('Artboard_4.jpg')) { this.src = '/img/Artboard_4.jpg'; }">
               <div class="poster-overlay-hint">
                 <i class="fas fa-sitemap"></i> Перейти к турниру
               </div>
@@ -156,13 +167,8 @@
 
         <!-- Отдельная кнопка REGISTRATION для мобильной версии -->
         <div class="mobile-poster-cta-wrapper">
-          <a 
-            id="mobile-reg-cta-btn" 
-            href="https://t.me/comp_games_lovers_bot" 
-            target="_blank" 
-            class="mobile-reg-cta-btn" 
-            title="Регистрация на турнире в Telegram (@comp_games_lovers_bot)"
-          >
+          <a id="mobile-reg-cta-btn" href="https://t.me/comp_games_lovers_bot" target="_blank"
+            class="mobile-reg-cta-btn" title="Регистрация на турнире в Telegram (@comp_games_lovers_bot)">
             <span class="reg-cta-icon-wrap">
               <i class="fab fa-telegram-plane"></i>
             </span>
@@ -183,7 +189,8 @@
       <div class="section-container">
         <div class="detail-header-flex">
           <div>
-            <button class="btn-ghost-sm" onclick="showHome()" style="margin-bottom: 10px;" title="Вернуться на Главную страницу">
+            <button class="btn-ghost-sm" onclick="showHome()" style="margin-bottom: 10px;"
+              title="Вернуться на Главную страницу">
               <i class="fas fa-arrow-left"></i> На Главную
             </button>
             <div class="detail-badge-group">
@@ -200,7 +207,8 @@
           </div>
 
           <div class="detail-header-actions">
-            <a id="detail-tg-btn" href="https://t.me/comp_games_lovers_bot" target="_blank" class="btn-action-primary" title="Регистрация через Telegram-бота">
+            <a id="detail-tg-btn" href="https://t.me/comp_games_lovers_bot" target="_blank" class="btn-action-primary"
+              title="Регистрация через Telegram-бота">
               <i class="fab fa-telegram-plane"></i> Регистрация в Telegram
             </a>
             <button class="btn-action-secondary" onclick="loadData()">
@@ -229,14 +237,18 @@
 
       <!-- 1. ТУРНИРНАЯ СЕТКА -->
       <div id="tab-content-bracket" class="tab-content active">
-        
+
         <!-- Подсказка -->
         <div class="bracket-info-alert">
           <div class="alert-icon"><i class="fas fa-info-circle"></i></div>
           <div class="alert-text">
-            <strong>Дисциплина:</strong> Mortal Kombat 1 • <strong>Формат:</strong> Double Elimination (Все раунды Bo1, 🥉 <strong>Матч за 3-е место</strong> в Финале Лузеров, Гранд-Финал — <strong>Bo5</strong> с правом сброса сетки). 
-            Регистрация: <a id="alert-bot-link" href="https://t.me/comp_games_lovers_bot" target="_blank" style="color: #fff; font-weight: 700; text-decoration: underline;">@comp_games_lovers_bot</a>
-            <span id="admin-bracket-hint" class="hidden"><br>💡 <em>Режим администратора активен: нажимайте на любой матч для изменения счёта и продвижения победителя.</em></span>
+            <strong>Дисциплина:</strong> Mortal Kombat 1 • <strong>Формат:</strong> Double Elimination (Все раунды Bo1,
+            🥉 <strong>Матч за 3-е место</strong> в Финале Лузеров, Гранд-Финал — <strong>Bo5</strong> с правом сброса
+            сетки).
+            Регистрация: <a id="alert-bot-link" href="https://t.me/comp_games_lovers_bot" target="_blank"
+              style="color: #fff; font-weight: 700; text-decoration: underline;">@comp_games_lovers_bot</a>
+            <span id="admin-bracket-hint" class="hidden"><br>💡 <em>Режим администратора активен: нажимайте на любой
+                матч для изменения счёта и продвижения победителя.</em></span>
           </div>
         </div>
 
@@ -321,7 +333,8 @@
                 <div class="matches-list" id="losers-round-5"></div>
               </div>
               <div class="round-column highlight-column bronze-column" id="losers-col-6">
-                <div class="round-heading bronze-heading">🥉 МАТЧ ЗА 3-Е МЕСТО (ФИНАЛ LB) <span class="bo-chip">Bo1</span></div>
+                <div class="round-heading bronze-heading">🥉 МАТЧ ЗА 3-Е МЕСТО (ФИНАЛ LB) <span
+                    class="bo-chip">Bo1</span></div>
                 <div class="matches-list" id="losers-round-6"></div>
               </div>
             </div>
@@ -407,18 +420,22 @@
 
       <!-- 2. СПИСОК УЧАСТНИКОВ -->
       <div id="tab-content-participants" class="tab-content">
-        
+
         <!-- Панель Поиска и Фильтрации -->
         <div class="participants-filter-bar">
           <div class="search-input-wrap">
             <i class="fas fa-search search-icon"></i>
-            <input type="text" id="participant-search" placeholder="Поиск по имени, никнейму или @username..." oninput="onSearchParticipants()">
+            <input type="text" id="participant-search" placeholder="Поиск по имени, никнейму или @username..."
+              oninput="onSearchParticipants()">
           </div>
 
           <div class="filter-buttons-group">
-            <button class="filter-btn active" onclick="filterParticipantStatus('all', this)">Все (<span id="count-all">0</span>)</button>
-            <button class="filter-btn" onclick="filterParticipantStatus('confirmed', this)">✅ Подтверждённые (<span id="count-confirmed">0</span>)</button>
-            <button class="filter-btn" onclick="filterParticipantStatus('pending', this)">⏳ Ожидающие (<span id="count-pending">0</span>)</button>
+            <button class="filter-btn active" onclick="filterParticipantStatus('all', this)">Все (<span
+                id="count-all">0</span>)</button>
+            <button class="filter-btn" onclick="filterParticipantStatus('confirmed', this)">✅ Подтверждённые (<span
+                id="count-confirmed">0</span>)</button>
+            <button class="filter-btn" onclick="filterParticipantStatus('pending', this)">⏳ Ожидающие (<span
+                id="count-pending">0</span>)</button>
           </div>
         </div>
 
@@ -449,7 +466,7 @@
   <!-- ================= СТРАНИЦА АДМИН-ПАНЕЛИ (/admin) ================= -->
   <div id="page-admin" class="page-view">
     <div class="section-container">
-      
+
       <!-- Форма Входа -->
       <div id="admin-auth-view" class="admin-login-box">
         <div class="admin-login-shield">
@@ -457,11 +474,12 @@
         </div>
         <h2>Панель Управления DARACYBER</h2>
         <p class="admin-login-sub">Доступ ограничен. Для входа введите пароль администратора:</p>
-        
+
         <div class="passcode-input-form">
           <div class="input-with-icon">
             <i class="fas fa-key"></i>
-            <input type="password" id="admin-passcode-input" placeholder="Введите пароль администратора" maxlength="50" onkeypress="if(event.key==='Enter') executeAdminLogin()">
+            <input type="password" id="admin-passcode-input" placeholder="Введите пароль администратора" maxlength="50"
+              onkeypress="if(event.key==='Enter') executeAdminLogin()">
           </div>
           <button class="btn-action-primary w-100" id="btn-admin-submit" onclick="executeAdminLogin()">
             <i class="fas fa-sign-in-alt"></i> Авторизоваться
@@ -472,7 +490,7 @@
 
       <!-- Панель Администратора -->
       <div id="admin-dashboard-view" class="admin-dashboard-box hidden">
-        
+
         <div class="dashboard-top-bar">
           <div class="dash-title">
             <i class="fas fa-sliders-h"></i>
@@ -536,7 +554,8 @@
           <div class="import-card">
             <div class="import-format-hint">
               <i class="fas fa-lightbulb"></i>
-              <span>Формат: <code>Имя — Никнейм</code> (разделитель: <code>—</code>, <code>–</code>, <code>-</code> или <code>|</code>). По одному участнику на строку.</span>
+              <span>Формат: <code>Имя — Никнейм</code> (разделитель: <code>—</code>, <code>–</code>, <code>-</code> или
+                <code>|</code>). По одному участнику на строку.</span>
             </div>
             <textarea id="import-players-textarea" class="import-textarea" rows="10" placeholder="Алексей — Scorpion_PRO
 Дмитрий — SubZero_Ninja
@@ -568,15 +587,20 @@
           <div class="admin-section-header">
             <div>
               <h3>Управление Матчами по Сетке MK1</h3>
-              <span class="badge-hint">Матчи разделены по этапам сетки. Нажмите на матч для редактирования счёта или выбора победителя.</span>
+              <span class="badge-hint">Матчи разделены по этапам сетки. Нажмите на матч для редактирования счёта или
+                выбора победителя.</span>
             </div>
 
             <!-- Фильтр категорий -->
             <div class="admin-filter-pills">
-              <button class="admin-filter-pill active" id="af-btn-all" onclick="filterAdminCategory('all', this)">Все Матчи (31)</button>
-              <button class="admin-filter-pill" id="af-btn-winners" onclick="filterAdminCategory('winners', this)">👑 Верхняя Сетка (15)</button>
-              <button class="admin-filter-pill" id="af-btn-losers" onclick="filterAdminCategory('losers', this)">💀 Сетка Лузеров (14)</button>
-              <button class="admin-filter-pill" id="af-btn-finals" onclick="filterAdminCategory('finals', this)">🏆 Гранд-Финал (2)</button>
+              <button class="admin-filter-pill active" id="af-btn-all" onclick="filterAdminCategory('all', this)">Все
+                Матчи (31)</button>
+              <button class="admin-filter-pill" id="af-btn-winners" onclick="filterAdminCategory('winners', this)">👑
+                Верхняя Сетка (15)</button>
+              <button class="admin-filter-pill" id="af-btn-losers" onclick="filterAdminCategory('losers', this)">💀
+                Сетка Лузеров (14)</button>
+              <button class="admin-filter-pill" id="af-btn-finals" onclick="filterAdminCategory('finals', this)">🏆
+                Гранд-Финал (2)</button>
             </div>
           </div>
 
@@ -629,20 +653,21 @@
       <div class="modal-top">
         <div class="modal-title-flex">
           <i class="fas fa-gamepad"></i>
-          <h3>Матч <span id="modal-match-id">#1</span> <span class="modal-round-tag" id="modal-match-round">WB Round 1</span></h3>
+          <h3>Матч <span id="modal-match-id">#1</span> <span class="modal-round-tag" id="modal-match-round">WB Round
+              1</span></h3>
         </div>
         <button class="modal-close-btn" onclick="closeModal()">&times;</button>
       </div>
 
       <div class="modal-body-content">
-        
+
         <!-- Блок Игроков и Счёта -->
         <div class="players-editor-grid">
-          
+
           <!-- Игрок 1 -->
           <div class="player-edit-card" id="player1-card-box">
             <div class="player-card-tag">УЧАСТНИК 1</div>
-            
+
             <div class="form-group">
               <label>Выбрать из зарегистрированных:</label>
               <select id="modal-p1-select" class="form-control" onchange="onSelectPlayer(1)">
@@ -743,7 +768,8 @@
   <div id="poster-modal" class="modal-backdrop hidden" onclick="closePosterModal()">
     <div class="poster-modal-wrapper" onclick="event.stopPropagation()">
       <button class="poster-modal-close" onclick="closePosterModal()">&times;</button>
-      <img id="poster-modal-img" class="poster-modal-img" src="/img/main.jpg" alt="Mortal Kombat 1 Tournament Poster" onerror="if (!this.src.endsWith('Artboard_4.jpg')) { this.src = '/img/Artboard_4.jpg'; }">
+      <img id="poster-modal-img" class="poster-modal-img" src="/img/main.jpg" alt="Mortal Kombat 1 Tournament Poster"
+        onerror="if (!this.src.endsWith('Artboard_4.jpg')) { this.src = '/img/Artboard_4.jpg'; }">
       <div class="poster-modal-footer">
         <button class="btn-action-primary" onclick="closePosterModal(); showTournament('bracket');">
           <i class="fas fa-sitemap"></i> Перейти к Турнирной Сетке
@@ -776,4 +802,5 @@
 
   <script src="/app.js"></script>
 </body>
+
 </html>
