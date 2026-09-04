@@ -76,6 +76,23 @@ class TournamentHTTPRequestHandler(SimpleHTTPRequestHandler):
         rel_path = path.lstrip("/")
         file_path = os.path.join(WEB_DIR, rel_path) if rel_path else os.path.join(WEB_DIR, "index.html")
 
+        # Если файл запрошен из /img/ и его нет в web/img/, проверим корневую папку img/
+        if path.startswith("/img/") and not os.path.isfile(file_path):
+            root_img_path = os.path.join(os.path.dirname(__file__), rel_path)
+            if os.path.isfile(root_img_path):
+                self.send_response(200)
+                if root_img_path.lower().endswith((".jpg", ".jpeg")):
+                    self.send_header("Content-Type", "image/jpeg")
+                elif root_img_path.lower().endswith(".png"):
+                    self.send_header("Content-Type", "image/png")
+                elif root_img_path.lower().endswith(".webp"):
+                    self.send_header("Content-Type", "image/webp")
+                self.send_header("Content-Length", str(os.path.getsize(root_img_path)))
+                self.end_headers()
+                with open(root_img_path, "rb") as f:
+                    self.wfile.write(f.read())
+                return
+
         if not os.path.isfile(file_path) and not path.startswith("/api/"):
             self.path = "/index.html"
             super().do_GET()

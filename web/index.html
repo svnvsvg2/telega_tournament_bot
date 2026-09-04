@@ -13,11 +13,86 @@
 </head>
 <body>
 
-  <!-- ================= ШАПКА ================= -->
-  <header class="site-header">
-    <div class="header-inner">
-      <div class="header-left">
-        <a href="/" class="brand-logo">
+  <!-- ================= ШАПКА: ВЫПЛЫВАЮЩЕЕ МЕНЮ СЛЕВА, ЛОГО ПО ЦЕНТРУ, СОЦСЕТИ СПРАВА ================= -->
+  <header class="site-header site-header-animated">
+    <div class="header-inner header-centered-layout">
+
+      <!-- Левая часть: Выплывающее меню турнира (слева относительно логотипа) -->
+      <div class="header-left-menu">
+        <div class="tourney-dropdown-wrapper" id="tourney-dropdown-wrapper">
+          <button class="tourney-dropdown-btn" id="tourney-dropdown-trigger" onclick="toggleTourneyDropdown(event)" aria-haspopup="true" aria-expanded="false" title="Открыть Меню Турнира">
+            <i class="fas fa-bars"></i>
+            <span class="dropdown-trigger-text">
+              <span class="text-long">МЕНЮ ТУРНИРА</span>
+              <span class="text-short">МЕНЮ</span>
+            </span>
+            <i class="fas fa-chevron-down dropdown-arrow"></i>
+          </button>
+
+          <!-- Выплывающая панель меню -->
+          <div class="tourney-dropdown-panel" id="tourney-dropdown-panel">
+            <div class="dropdown-header">
+              <div class="dropdown-header-title">
+                <i class="fas fa-fire-alt text-gold"></i>
+                <span>МЕНЮ ТУРНИРА</span>
+              </div>
+              <span class="dropdown-badge">MK1</span>
+            </div>
+
+            <div class="dropdown-items">
+              <button class="dropdown-item" onclick="selectTourneyTab('bracket')">
+                <div class="dropdown-item-icon icon-bracket"><i class="fas fa-sitemap"></i></div>
+                <div class="dropdown-item-info">
+                  <span class="dropdown-item-title">Турнирная Сетка</span>
+                  <span class="dropdown-item-desc">Double Elimination • Bo1 / Bo5</span>
+                </div>
+              </button>
+
+              <button class="dropdown-item" onclick="selectTourneyTab('participants')">
+                <div class="dropdown-item-icon icon-players"><i class="fas fa-users"></i></div>
+                <div class="dropdown-item-info">
+                  <span class="dropdown-item-title">Список Бойцов</span>
+                  <span class="dropdown-item-desc">16 участников соревнований</span>
+                </div>
+              </button>
+
+              <a id="dropdown-tg-btn" href="https://t.me/comp_games_lovers_bot" target="_blank" class="dropdown-item item-tg">
+                <div class="dropdown-item-icon icon-tg"><i class="fab fa-telegram-plane"></i></div>
+                <div class="dropdown-item-info">
+                  <span class="dropdown-item-title">Регистрация в Telegram</span>
+                  <span class="dropdown-item-desc">Бот @comp_games_lovers_bot</span>
+                </div>
+                <i class="fas fa-external-link-alt dropdown-ext-icon"></i>
+              </a>
+
+              <button class="dropdown-item" onclick="selectTourneyTab('rules')">
+                <div class="dropdown-item-icon icon-rules"><i class="fas fa-book-open"></i></div>
+                <div class="dropdown-item-info">
+                  <span class="dropdown-item-title">Регламент Турнира</span>
+                  <span class="dropdown-item-desc">Правила, персонажи и арены</span>
+                </div>
+              </button>
+            </div>
+
+            <div class="dropdown-socials-row">
+              <span class="dropdown-socials-label">МЕДИА И СТРИМЫ:</span>
+              <div class="dropdown-socials-links">
+                <a href="https://twitch.tv" target="_blank" title="Twitch" class="dropdown-soc-link"><i class="fab fa-twitch"></i> Twitch</a>
+                <a href="https://youtube.com" target="_blank" title="YouTube" class="dropdown-soc-link"><i class="fab fa-youtube"></i> YouTube</a>
+              </div>
+            </div>
+
+            <div class="dropdown-footer">
+              <i class="fas fa-trophy text-gold"></i>
+              <span>Официальный турнир DARACYBER</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Центральная часть: Логотип DARACYBER строго по центру -->
+      <div class="header-center-logo">
+        <a href="/" class="brand-logo" onclick="event.preventDefault(); showHome();" title="DARACYBER — На Главную">
           <div class="brand-emblem">
             <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="brand-icon">
               <path d="M16 2L2 10L16 18L30 10L16 2Z" fill="#f3f4f6"/>
@@ -31,40 +106,21 @@
             <span class="brand-tag">ESPORTS TOURNAMENT</span>
           </div>
         </a>
+      </div>
 
-        <!-- Соцсети -->
+      <!-- Правая часть: Кнопка REGISTRATION и соцсети (выровнены по правому краю постера) -->
+      <div class="header-right-socials">
         <div class="header-socials">
-          <a href="https://t.me/comp_games_lovers_bot" target="_blank" title="Telegram Бот" class="social-link"><i class="fab fa-telegram-plane"></i></a>
-          <a href="https://twitch.tv" target="_blank" title="Twitch" class="social-link"><i class="fab fa-twitch"></i></a>
-          <a href="https://youtube.com" target="_blank" title="YouTube" class="social-link"><i class="fab fa-youtube"></i></a>
+          <a id="header-reg-btn" href="https://t.me/comp_games_lovers_bot" target="_blank" title="Регистрация в Telegram (@comp_games_lovers_bot)" class="header-reg-btn">
+            <i class="fab fa-telegram-plane"></i>
+            <span class="reg-text-long">REGISTRATION</span>
+            <span class="reg-text-short">REG</span>
+          </a>
+          <a href="https://twitch.tv" target="_blank" title="Twitch" class="social-link header-soc-desktop"><i class="fab fa-twitch"></i></a>
+          <a href="https://youtube.com" target="_blank" title="YouTube" class="social-link header-soc-desktop"><i class="fab fa-youtube"></i></a>
         </div>
       </div>
 
-      <!-- Навигация -->
-      <nav class="main-nav">
-        <button class="nav-item active" id="nav-btn-bracket" onclick="switchTab('bracket')">
-          <i class="fas fa-sitemap"></i> Сетка
-        </button>
-        <button class="nav-item" id="nav-btn-participants" onclick="switchTab('participants')">
-          <i class="fas fa-users"></i> Участники (<span id="nav-participants-count">0</span>)
-        </button>
-        <button class="nav-item" id="nav-btn-rules" onclick="switchTab('rules')">
-          <i class="fas fa-scroll"></i> Регламент
-        </button>
-      </nav>
-
-      <!-- Правая часть -->
-      <div class="header-right">
-        <button id="stage-mode-btn" class="btn-ghost-sm" onclick="toggleStageMode()" title="Полноэкранный режим трансляции">
-          <i class="fas fa-expand"></i> Режим Сцены
-        </button>
-        <a href="/admin" class="btn-ghost-sm" onclick="event.preventDefault(); showAdmin();" title="Панель администратора">
-          <i class="fas fa-cog"></i> Админ
-        </a>
-        <div id="admin-status-indicator" class="admin-status-pill hidden">
-          <i class="fas fa-shield-alt"></i> АДМИН: ON
-        </div>
-      </div>
     </div>
   </header>
 
@@ -75,14 +131,42 @@
     </button>
   </div>
 
-  <!-- ================= ОСНОВНАЯ СТРАНИЦА ТУРНИРА ================= -->
-  <div id="page-tournament" class="page-view active">
+  <!-- ================= ГЛАВНАЯ СТРАНИЦА (/): ПОСТЕР СТРОГО ПО ЦЕНТРУ ================= -->
+  <div id="page-home" class="page-view active">
+    <div class="home-poster-viewport">
+      <!-- Постер турнира на весь экран строго по центру -->
+      <main class="home-full-poster-card">
+        <div class="poster-fullscreen-wrapper">
+          <div class="poster-glow-backdrop"></div>
+          <div class="poster-card-frame" onclick="openPosterModal()" title="Нажмите для открытия в полном окне">
+            <img 
+              id="home-main-image" 
+              class="poster-fullscreen-img" 
+              src="/img/main.jpg" 
+              alt="Mortal Kombat 1 Championship — Главный Постер" 
+              onerror="if (!this.src.endsWith('Artboard_4.jpg')) { this.src = '/img/Artboard_4.jpg'; }"
+            >
+            <div class="poster-overlay-hint">
+              <i class="fas fa-search-plus"></i> Просмотреть постер
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+
+  <!-- ================= ОТДЕЛЬНАЯ СТРАНИЦА ТУРНИРА (/tournament) ================= -->
+  <div id="page-tournament" class="page-view">
 
     <!-- Верхний Баннер -->
     <section class="tournament-header-banner">
       <div class="section-container">
         <div class="detail-header-flex">
           <div>
+            <button class="btn-ghost-sm" onclick="showHome()" style="margin-bottom: 10px;" title="Вернуться на Главную страницу">
+              <i class="fas fa-arrow-left"></i> На Главную
+            </button>
             <div class="detail-badge-group">
               <span class="status-chip chip-live">🔴 LIVE / СКОРО</span>
               <span class="status-chip chip-game">MORTAL KOMBAT 1</span>
@@ -104,6 +188,19 @@
               <i class="fas fa-sync-alt"></i> Обновить
             </button>
           </div>
+        </div>
+
+        <!-- Вкладки Турнира: Сетка, Участники, Регламент -->
+        <div class="tourney-nav-tabs">
+          <button class="tourney-nav-tab active" id="ttab-bracket" onclick="switchTab('bracket')">
+            <i class="fas fa-sitemap"></i> Турнирная Сетка
+          </button>
+          <button class="tourney-nav-tab" id="ttab-participants" onclick="switchTab('participants')">
+            <i class="fas fa-users"></i> Участники (<span id="tourney-tab-count">0</span>)
+          </button>
+          <button class="tourney-nav-tab" id="ttab-rules" onclick="switchTab('rules')">
+            <i class="fas fa-scroll"></i> Регламент и Правила
+          </button>
         </div>
       </div>
     </section>
@@ -340,12 +437,12 @@
           <i class="fas fa-lock"></i>
         </div>
         <h2>Панель Управления DARACYBER</h2>
-        <p class="admin-login-sub">Доступ закрыт. Для входа введите пароль администратора турнира (<strong>4321</strong>):</p>
+        <p class="admin-login-sub">Доступ ограничен. Для входа введите пароль администратора:</p>
         
         <div class="passcode-input-form">
           <div class="input-with-icon">
             <i class="fas fa-key"></i>
-            <input type="password" id="admin-passcode-input" placeholder="Введите пароль (4321)" maxlength="20" onkeypress="if(event.key==='Enter') executeAdminLogin()">
+            <input type="password" id="admin-passcode-input" placeholder="Введите пароль администратора" maxlength="50" onkeypress="if(event.key==='Enter') executeAdminLogin()">
           </div>
           <button class="btn-action-primary w-100" id="btn-admin-submit" onclick="executeAdminLogin()">
             <i class="fas fa-sign-in-alt"></i> Авторизоваться
@@ -615,6 +712,20 @@
   </div>
 
 
+  <!-- ================= МОДАЛЬНОЕ ОКНО ПРОСМОТРА ПОСТЕРА ================= -->
+  <div id="poster-modal" class="modal-backdrop hidden" onclick="closePosterModal()">
+    <div class="poster-modal-wrapper" onclick="event.stopPropagation()">
+      <button class="poster-modal-close" onclick="closePosterModal()">&times;</button>
+      <img id="poster-modal-img" class="poster-modal-img" src="/img/main.jpg" alt="Mortal Kombat 1 Tournament Poster" onerror="if (!this.src.endsWith('Artboard_4.jpg')) { this.src = '/img/Artboard_4.jpg'; }">
+      <div class="poster-modal-footer">
+        <button class="btn-action-primary" onclick="closePosterModal(); showTournament('bracket');">
+          <i class="fas fa-sitemap"></i> Перейти к Турнирной Сетке
+        </button>
+      </div>
+    </div>
+  </div>
+
+
   <!-- ================= ПОДВАЛ ================= -->
   <footer class="site-footer">
     <div class="footer-inner">
@@ -627,9 +738,11 @@
       </div>
 
       <div class="footer-links">
-        <a href="javascript:void(0)" onclick="showTournament()">Турнирная Сетка</a>
+        <a href="javascript:void(0)" onclick="showHome()">Главная</a>
+        <a href="javascript:void(0)" onclick="showTournament('bracket')">Турнирная Сетка</a>
+        <a href="javascript:void(0)" onclick="showTournament('participants')">Участники</a>
+        <a href="javascript:void(0)" onclick="showTournament('rules')">Регламент</a>
         <a id="footer-tg-link" href="https://t.me/comp_games_lovers_bot" target="_blank">Telegram Бот</a>
-        <a href="/admin" onclick="event.preventDefault(); showAdmin();">Панель Управления</a>
       </div>
     </div>
   </footer>

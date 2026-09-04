@@ -44,6 +44,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // Клавиша Escape для закрытия модальных окон или выхода из режима сцены
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
+      const dropdown = document.getElementById("tourney-dropdown-wrapper") || document.getElementById("tourney-dropdown-container");
+      if (dropdown && dropdown.classList.contains("open")) {
+        closeTourneyDropdown();
+        return;
+      }
+      const posterModal = document.getElementById("poster-modal");
+      if (posterModal && !posterModal.classList.contains("hidden")) {
+        closePosterModal();
+        return;
+      }
       const modal = document.getElementById("match-modal");
       if (modal && !modal.classList.contains("hidden")) {
         closeModal();
@@ -52,6 +62,43 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
+
+  // Закрытие выпадающего меню турнира при клике вне него
+  document.addEventListener("click", (e) => {
+    const container = document.getElementById("tourney-dropdown-wrapper") || document.getElementById("tourney-dropdown-container");
+    if (container && !container.contains(e.target)) {
+      closeTourneyDropdown();
+    }
+  });
+
+  // Синхронизация ширины шапки с точной шириной постера
+  syncHeaderWithPoster();
+  window.addEventListener("resize", syncHeaderWithPoster);
+
+  const mainImg = document.getElementById("home-main-image");
+  if (mainImg) {
+    if (mainImg.complete) {
+      syncHeaderWithPoster();
+    } else {
+      mainImg.addEventListener("load", syncHeaderWithPoster);
+    }
+  }
+
+  if (window.ResizeObserver) {
+    const ro = new ResizeObserver(() => syncHeaderWithPoster());
+    const frame = document.querySelector(".poster-card-frame");
+    if (frame) ro.observe(frame);
+    if (mainImg) ro.observe(mainImg);
+  }
+
+  window.addEventListener("popstate", () => {
+    initRouting();
+  });
+
+  // Снимаем задержки анимаций после завершения мягкой вступительной интро-анимации
+  setTimeout(() => {
+    document.body.classList.add("intro-played");
+  }, 2700);
 });
 
 function startAdaptivePolling() {
@@ -61,15 +108,21 @@ function startAdaptivePolling() {
 }
 
 // ==========================================================================
-// НАВИГАЦИЯ
+// НАВИГАЦИЯ И МАРШРУТИЗАЦИЯ
 // ==========================================================================
 function initRouting() {
   const path = window.location.pathname.toLowerCase().replace(/\/$/, "");
 
   if (path === "/admin" || path.startsWith("/admin")) {
     showAdmin();
+  } else if (path === "/tournament" || path === "/bracket") {
+    showTournament("bracket");
+  } else if (path === "/participants") {
+    showTournament("participants");
+  } else if (path === "/rules") {
+    showTournament("rules");
   } else {
-    showTournament();
+    showHome();
   }
 
   if (adminAuth) {
@@ -77,18 +130,56 @@ function initRouting() {
   }
 }
 
-function showTournament() {
+function showHome() {
+  document.body.classList.add("view-home");
+  document.body.classList.remove("view-tournament", "view-admin");
+
+  document.querySelectorAll(".page-view").forEach(p => p.classList.remove("active"));
+  const target = document.getElementById("page-home");
+  if (target) target.classList.add("active");
+
+  document.querySelectorAll(".main-nav .nav-item").forEach(btn => btn.classList.remove("active"));
+  const navBtn = document.getElementById("nav-btn-home");
+  if (navBtn) navBtn.classList.add("active");
+
+  if (window.location.pathname !== "/" && !window.location.pathname.endsWith("index.html")) {
+    window.history.pushState({}, "", "/");
+  }
+
+  setTimeout(syncHeaderWithPoster, 30);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showTournament(tabName = "bracket") {
+  document.body.classList.add("view-tournament");
+  document.body.classList.remove("view-home", "view-admin");
+
   document.querySelectorAll(".page-view").forEach(p => p.classList.remove("active"));
   const target = document.getElementById("page-tournament");
   if (target) target.classList.add("active");
+
+  switchTab(tabName);
+
+  if (window.location.pathname !== "/tournament" && !window.location.pathname.startsWith("/bracket")) {
+    window.history.pushState({}, "", "/tournament");
+  }
+
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function showAdmin() {
+  document.body.classList.add("view-admin");
+  document.body.classList.remove("view-home", "view-tournament");
+
   document.querySelectorAll(".page-view").forEach(p => p.classList.remove("active"));
   const target = document.getElementById("page-admin");
   if (target) target.classList.add("active");
   checkAdminState();
+
+  if (window.location.pathname !== "/admin") {
+    window.history.pushState({}, "", "/admin");
+  }
+
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -97,11 +188,71 @@ function switchTab(tabName) {
   const navBtn = document.getElementById(`nav-btn-${tabName}`);
   if (navBtn) navBtn.classList.add("active");
 
+  document.querySelectorAll(".tourney-nav-tab").forEach(tab => tab.classList.remove("active"));
+  const tourneyTab = document.getElementById(`ttab-${tabName}`);
+  if (tourneyTab) tourneyTab.classList.add("active");
+
   document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
   const targetContent = document.getElementById(`tab-content-${tabName}`);
   if (targetContent) targetContent.classList.add("active");
 
-  showTournament();
+  // Убеждаемся, что видна страница турнира
+  document.querySelectorAll(".page-view").forEach(p => p.classList.remove("active"));
+  const target = document.getElementById("page-tournament");
+  if (target) target.classList.add("active");
+}
+
+// ==========================================================================
+// ВЫПЛЫВАЮЩЕЕ МЕНЮ ТУРНИРА В ШАПКЕ
+// ==========================================================================
+function toggleTourneyDropdown(e) {
+  if (e) {
+    e.stopPropagation();
+  }
+  const wrapper = document.getElementById("tourney-dropdown-wrapper") || document.getElementById("tourney-dropdown-container");
+  const btn = document.getElementById("tourney-dropdown-trigger");
+  if (!wrapper) return;
+  const isOpen = wrapper.classList.toggle("open");
+  if (btn) {
+    btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  }
+}
+
+function closeTourneyDropdown() {
+  const wrapper = document.getElementById("tourney-dropdown-wrapper") || document.getElementById("tourney-dropdown-container");
+  const btn = document.getElementById("tourney-dropdown-trigger");
+  if (wrapper && wrapper.classList.contains("open")) {
+    wrapper.classList.remove("open");
+    if (btn) {
+      btn.setAttribute("aria-expanded", "false");
+    }
+  }
+}
+
+function selectTourneyTab(tabName) {
+  closeTourneyDropdown();
+  showTournament(tabName);
+}
+
+function syncHeaderWithPoster() {
+  const posterFrame = document.querySelector(".poster-card-frame") || document.getElementById("home-main-image");
+  if (!posterFrame) return;
+
+  const rect = posterFrame.getBoundingClientRect();
+  if (rect.width > 50) {
+    const posterW = Math.round(rect.width);
+    document.documentElement.style.setProperty("--poster-width", `${posterW}px`);
+  }
+}
+
+function openPosterModal() {
+  const modal = document.getElementById("poster-modal");
+  if (modal) modal.classList.remove("hidden");
+}
+
+function closePosterModal() {
+  const modal = document.getElementById("poster-modal");
+  if (modal) modal.classList.add("hidden");
 }
 
 function toggleStageMode() {
@@ -162,6 +313,23 @@ function updateInfoUI(data) {
   const navCount = document.getElementById("nav-participants-count");
   if (navCount) navCount.textContent = data.confirmed_count;
 
+  // Обновление блока о турнире в шапке (перенесён сверху)
+  const headerTitle = document.getElementById("header-tourney-title");
+  if (headerTitle && data.tournament) headerTitle.textContent = data.tournament;
+
+  const headerDate = document.getElementById("header-tourney-date");
+  if (headerDate && data.datetime) {
+    headerDate.innerHTML = `<i class="far fa-clock text-gold"></i> ${data.datetime}`;
+  }
+
+  const headerRegistered = document.getElementById("header-tourney-registered");
+  if (headerRegistered) {
+    headerRegistered.innerHTML = `<i class="fas fa-user-check text-cyan"></i> ${data.confirmed_count} / ${data.max_participants} Участников`;
+  }
+
+  const tourneyTabCount = document.getElementById("tourney-tab-count");
+  if (tourneyTabCount) tourneyTabCount.textContent = data.confirmed_count;
+
   const rulesEl = document.getElementById("rules-content-display");
   if (rulesEl && data.rules) {
     rulesEl.innerHTML = escapeHtml(data.rules).replace(/\n/g, "<br>");
@@ -169,6 +337,37 @@ function updateInfoUI(data) {
 
   const botUrl = data.bot_url || DEFAULT_BOT_URL;
   const botUser = data.bot_username || DEFAULT_BOT_USERNAME;
+
+  // Обновление элементов Главной страницы (Home Page)
+  const homeTitle = document.getElementById("home-tourney-title");
+  if (homeTitle && data.tournament) homeTitle.textContent = data.tournament;
+
+  const homeDate = document.getElementById("home-tourney-date");
+  if (homeDate && data.datetime) homeDate.textContent = data.datetime;
+
+  const homeRegistered = document.getElementById("home-tourney-registered");
+  if (homeRegistered) homeRegistered.textContent = `${data.confirmed_count} / ${data.max_participants} бойцов`;
+
+  const homeFeatureCount = document.getElementById("home-feature-count");
+  if (homeFeatureCount) homeFeatureCount.textContent = `${data.confirmed_count} подтверждено`;
+
+  const homeTg = document.getElementById("home-tg-btn");
+  if (homeTg) {
+    homeTg.href = botUrl;
+    homeTg.title = `Регистрация через Telegram (@${botUser})`;
+  }
+
+  const dropdownTg = document.getElementById("dropdown-tg-btn");
+  if (dropdownTg) {
+    dropdownTg.href = botUrl;
+    dropdownTg.title = `Регистрация через Telegram (@${botUser})`;
+  }
+
+  const headerReg = document.getElementById("header-reg-btn");
+  if (headerReg) {
+    headerReg.href = botUrl;
+    headerReg.title = `Регистрация через Telegram (@${botUser})`;
+  }
 
   const detailTg = document.getElementById("detail-tg-btn");
   if (detailTg) {
@@ -446,7 +645,7 @@ async function executeAdminLogin() {
   const passcode = input.value.trim();
 
   if (!passcode) {
-    errorEl.textContent = "Пожалуйста, введите пароль (4321)";
+    errorEl.textContent = "Пожалуйста, введите пароль администратора";
     errorEl.classList.remove("hidden");
     return;
   }
